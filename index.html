@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FIT Club Day 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Layout: clean-bg hero with bracket wordmark, slim urgency bar, lean single-scroll info stack */
+    --bg: #0E3FBE;
+    --surface: #1550D6;
+    --surface-2: #1C63F0;
+    --fg: #FFFFFF;
+    --fg-muted: #CFE0FF;
+    --accent: #22E6FF;
+    --accent-2: #B14AFF;
+    --brand-blue: #1C7CF0;
+    --line: rgba(255,255,255,0.22);
+
+    --font-display: 'Baloo 2', 'Arial Rounded MT Bold', sans-serif;
+    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg: #F2F6FF;
+      --surface: #FFFFFF;
+      --surface-2: #E7EEFF;
+      --fg: #081028;
+      --fg-muted: #45507A;
+      --accent: #0097B2;
+      --accent-2: #8A2BE2;
+      --brand-blue: #155FC7;
+      --line: rgba(8,16,40,0.12);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg: #F2F6FF;
+    --surface: #FFFFFF;
+    --surface-2: #E7EEFF;
+    --fg: #081028;
+    --fg-muted: #45507A;
+    --accent: #0097B2;
+    --accent-2: #8A2BE2;
+    --brand-blue: #155FC7;
+    --line: rgba(8,16,40,0.12);
+    color-scheme: light;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+  main{background:var(--bg);}
+  img{max-width:100%;display:block;}
+  [hidden]{display:none!important;}
+  a{color:inherit;}
+  h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;}
+  .wrap{
+    max-width:1080px;
+    margin-inline:auto;
+    padding-left:max(16px, env(safe-area-inset-left,0px));
+    padding-right:max(16px, env(safe-area-inset-right,0px));
+  }
+  section{padding-block:3.4rem;}
+  .eyebrow{
+    font-weight:700;
+    font-size:0.78rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.5rem;
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:1rem;
+    padding:0.95rem 1.8rem;
+    border-radius:999px;
+    border:2px solid transparent;
+    cursor:pointer;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:transform 0.15s ease;
+  }
+  .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+  .btn-primary{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(120deg, var(--accent), var(--accent-2));
+    color:#06111A;
+    box-shadow:0 10px 30px -12px color-mix(in srgb, var(--accent) 65%, transparent);
+  }
+  .btn-primary::after{
+    content:"";
+    position:absolute;
+    top:0; left:-60%;
+    width:40%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.65), transparent);
+    transform:skewX(-20deg);
+    transition:left 0.6s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 36px -12px color-mix(in srgb, var(--accent-2) 70%, transparent);}
+  .btn-primary:hover::after{left:130%;}
+  .btn-ghost{border-color:rgba(255,255,255,0.5);color:var(--fg);background:rgba(255,255,255,0.08);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.18);transform:translateY(-2px);}
+
+  /* ---------- Header / credit strip ---------- */
+  header.site{
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .credit-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1.4rem;
+    flex-wrap:wrap;
+    padding-block:0.9rem;
+  }
+  .wordmark{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:1.05rem;
+    display:flex;
+    align-items:center;
+    gap:0.4rem;
+    white-space:nowrap;
+  }
+  .wordmark b{color:var(--accent);font-weight:800;}
+  .logo-groups{
+    display:flex;
+    align-items:center;
+    gap:1.6rem;
+    flex-wrap:wrap;
+  }
+  .logo-group{display:flex;align-items:center;gap:0.6rem;}
+  .logo-group span{
+    font-size:0.62rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--fg-muted);
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .logo-group .imgs{display:flex;align-items:center;gap:0.7rem;}
+  .logo-group img{
+    height:30px;
+    width:auto;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,0.45));
+    transition:transform 0.2s ease, filter 0.2s ease;
+  }
+  .logo-group img:hover{
+    transform:translateY(-2px) scale(1.08);
+    filter:drop-shadow(0 4px 10px rgba(34,230,255,0.45));
+  }
+  @media (max-width:760px){
+    .logo-groups{gap:1rem;}
+    .logo-group img{height:22px;}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    background:
+      linear-gradient(180deg, rgba(5,11,31,0) 55%, var(--bg) 100%),
+      url('assets/fit-club-day-background-clean.webp');
+    background-size:cover;
+    background-position:center;
+    padding-block:4.2rem 3.6rem;
+    color:#F3F6FF;
+  }
+  .hero .wrap{position:relative;z-index:1;}
+  .hero .eyebrow{color:#C9FBFF;}
+  .hero h1{
+    font-size:clamp(2.3rem, 6vw, 4rem);
+    line-height:1.04;
+    margin-top:0.5rem;
+    color:#fff;
+  }
+  .hero h1 .bracket{
+    background:linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+    background-size:300% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:gradientShift 6s ease-in-out infinite;
+  }
+  @keyframes gradientShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero h1 .bracket{animation:none;background-position:0% 50%;}
+  }
+  .hero .tagline{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(1.05rem,2.2vw,1.35rem);
+    color:#D9F7FF;
+    margin-top:0.4rem;
+  }
+  .hero .lead{
+    max-width:52ch;
+    color:#E4ECFF;
+    margin-top:1.1rem;
+    font-size:1.02rem;
+  }
+  .fact-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.8rem;
+    margin-top:1.8rem;
+  }
+  .fact-pill{
+    background:rgba(5,11,31,0.55);
+    border:1px solid rgba(255,255,255,0.22);
+    backdrop-filter:blur(6px);
+    border-radius:999px;
+    padding:0.55rem 1.1rem;
+    font-size:0.86rem;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    color:#fff;
+  }
+  .fact-pill strong{color:#5EF0F5;}
+  .hero-ctas{
+    display:flex;
+    flex-wrap:wrap;
+    gap:1rem;
+    margin-top:2rem;
+  }
+
+  /* ---------- Section heads ---------- */
+  .sec-head{margin-bottom:2.1rem;max-width:56ch;}
+  .sec-head h2{font-size:clamp(1.7rem,3.8vw,2.3rem);margin-top:0.4rem;}
+
+  /* ---------- Benefits ---------- */
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
+  .benefit-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1.3rem;
+  }
+  .benefit-card{
+    position:relative;
+    border-radius:24px;
+    padding:2.1rem 1.4rem 1.9rem;
+    min-width:0;
+    overflow:hidden;
+    color:#06111A;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.45rem;
+    box-shadow:0 14px 34px -18px rgba(0,0,0,0.6);
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .benefit-card{color:#fff;}
+  .benefit-card:nth-child(1){background:linear-gradient(155deg, #19C9E6, #0A6E92);}
+  .benefit-card:nth-child(2){background:linear-gradient(155deg, #9B5CF6, #5B21B6);}
+  .benefit-card:nth-child(3){background:linear-gradient(155deg, #2F6FEB, #15399E);}
+  .benefit-card:nth-child(4){background:linear-gradient(155deg, #0EA5B8, #075E6B);}
+  .benefit-card::after{
+    content:"";
+    position:absolute;
+    top:0; left:-75%;
+    width:50%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-20deg);
+    transition:left 0.7s ease;
+  }
+  .benefit-card:hover, .benefit-card:focus-within{
+    transform:translateY(-10px) scale(1.03);
+    box-shadow:0 26px 54px -18px rgba(0,0,0,0.65);
+  }
+  .benefit-card:hover::after{left:130%;}
+  .benefit-icon{
+    width:66px; height:66px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.28);
+    margin-bottom:0.2rem;
+    animation:iconFloat 3.2s ease-in-out infinite;
+  }
+  .benefit-card:nth-child(2) .benefit-icon{animation-delay:.3s;}
+  .benefit-card:nth-child(3) .benefit-icon{animation-delay:.6s;}
+  .benefit-card:nth-child(4) .benefit-icon{animation-delay:.9s;}
+  .benefit-icon svg{width:32px;height:32px;color:#06111A;}
+  @keyframes iconFloat{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-7px);}
+  }
+  .benefit-card h3{
+    font-size:1.15rem;
+    color:#fff;
+    line-height:1.22;
+  }
+  .benefit-card .tab-sub{
+    font-size:0.86rem;
+    font-weight:700;
+    color:rgba(255,255,255,0.82);
+  }
+  @media (prefers-reduced-motion:reduce){
+    .benefit-icon{animation:none;}
+  }
+  @media (max-width:860px){.benefit-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.benefit-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Contacts ---------- */
+  .contact-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1rem;
+  }
+  .contact-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:12px;
+    padding:1.1rem 1.3rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    min-width:0;
+    transition:transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .contact-card:nth-child(2){border-left-color:var(--accent-2);}
+  .contact-card:nth-child(3){border-left-color:var(--accent);}
+  .contact-card:nth-child(4){border-left-color:var(--accent-2);}
+  .contact-card:nth-child(5){border-left-color:var(--accent);}
+  .contact-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 14px 30px -18px rgba(0,0,0,0.5);
+  }
+  .contact-card .who{min-width:0;}
+  .contact-card .name{font-weight:700;font-size:0.96rem;}
+  .contact-card .role{font-size:0.82rem;color:var(--fg-muted);margin-top:0.15rem;}
+  .contact-card .phone{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    color:var(--accent);
+    font-size:0.92rem;
+    white-space:nowrap;
+    text-decoration:none;
+  }
+  @media (max-width:700px){.contact-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Footer ---------- */
+  footer.site{
+    border-top:1px solid var(--line);
+    padding-block:2.2rem;
+    text-align:center;
+  }
+  footer.site p{margin:0.3rem 0;font-size:0.84rem;color:var(--fg-muted);}
+  footer.site .org{color:var(--fg);font-weight:600;}
+</style>
+</head>
+<body>
+
+
+<header class="site">
+  <div class="wrap credit-row">
+    <div class="wordmark">FIT <b>CLUB'S DAY</b> 2026</div>
+    <div class="logo-groups">
+      <div class="logo-group">
+        <span>Chỉ đạo</span>
+        <div class="imgs">
+          <img src="assets/bo-logo/transparent/01-hcm-ute.png" alt="HCM-UTE">
+          <img src="assets/bo-logo/transparent/02-fit-hcm-ute.png" alt="Khoa Công nghệ Thông tin HCM-UTE">
+        </div>
+      </div>
+      <div class="logo-group">
+        <span>Phối hợp</span>
+        <div class="imgs">
+          <img src="assets/bo-logo/transparent/03-doan-thanh-nien.png" alt="Đoàn Thanh niên">
+          <img src="assets/bo-logo/transparent/04-hoi-sinh-vien.png" alt="Hội Sinh viên Việt Nam">
+        </div>
+      </div>
+      <div class="logo-group">
+        <span>Tổ chức</span>
+        <div class="imgs">
+          <img src="assets/bo-logo/transparent/05-hcmute-chip.png" alt="HCMUTE">
+          <img src="assets/bo-logo/transparent/06-hcmute-isc.png" alt="HCMUTE ISC">
+          <img src="assets/bo-logo/transparent/07-rtic.png" alt="RTIC">
+          <img src="assets/bo-logo/transparent/08-dsc.png" alt="HCMUTE Developer Student Club">
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Khoa Công nghệ Thông tin · HCM-UTE</p>
+      <h1>FIT <span class="bracket">&lt;/</span>Club<span class="bracket">&gt;</span> Day 2026</h1>
+      <p class="tagline">Where Tech Meets Dreams</p>
+      <p class="lead">Ngày hội giao lưu của các CLB học thuật và Sinh viên 5 Tốt khoa Công nghệ Thông tin — nơi cập nhật xu hướng công nghệ, kết nối cộng đồng và trải nghiệm cùng các CLB trong khoa.</p>
+      <div class="fact-row">
+        <span class="fact-pill"><strong>08:00–12:00</strong> · 17.10.2026</span>
+        <span class="fact-pill">Phòng họp II, lầu 6 — Tòa nhà Trung tâm, HCMUTE</span>
+        <span class="fact-pill">Dành cho sinh viên khoa CNTT</span>
+      </div>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#benefits">Khám Phá Hoạt Động</a>
+        <a class="btn btn-ghost" href="#contact">Cần hỗ trợ?</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="benefits">
+    <div class="wrap">
+      <h2 class="sr-only">Bạn sẽ được gì khi tham gia FIT Club's Day 2026</h2>
+      <div class="benefit-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="5"/><line x1="7" y1="10.5" x2="7" y2="14.5"/><line x1="5" y1="12.5" x2="9" y2="12.5"/><circle cx="16" cy="11" r="1"/><circle cx="18.5" cy="13.5" r="1"/></svg>
+          </div>
+          <h3>Trò Chơi &amp; Thử Thách</h3>
+          <span class="tab-sub">Đậm chất công nghệ</span>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a2.5 2.5 0 005 0 2.5 2.5 0 005 0 2.5 2.5 0 005 0 2.5 2.5 0 005 0"/><path d="M4 9v10h16V9"/><path d="M9.5 19v-5a2.5 2.5 0 015 0v5"/></svg>
+          </div>
+          <h3>Gian Hàng Học Thuật</h3>
+          <span class="tab-sub">Từ các CLB trong khoa</span>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><line x1="6.7" y1="7.2" x2="10.5" y2="16.3"/><line x1="17.3" y1="7.2" x2="13.5" y2="16.3"/><line x1="7" y1="6" x2="17" y2="6"/></svg>
+          </div>
+          <h3>Kết Nối Cộng Đồng</h3>
+          <span class="tab-sub">Sinh viên đam mê công nghệ</span>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="11" rx="1.5"/><line x1="3" y1="13" x2="21" y2="13"/><line x1="12" y1="9" x2="12" y2="20"/><path d="M12 9c-1.2-3-5-3.6-5-1 0 1.4 1.6 1 5 1z"/><path d="M12 9c1.2-3 5-3.6 5-1 0 1.4-1.6 1-5 1z"/></svg>
+          </div>
+          <h3>Quà Tặng May Mắn</h3>
+          <span class="tab-sub">Vòng quay số, quà cực chất</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Hỗ trợ</p>
+        <h2>Mọi thắc mắc vui lòng liên hệ</h2>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="who"><div class="name">Nguyễn Trà Huy</div><div class="role">UV BTV Đoàn khoa CNTT</div></div>
+          <a class="phone" href="tel:0325585320">032 5585 320</a>
+        </div>
+        <div class="contact-card">
+          <div class="who"><div class="name">Lê Vũ Xuân An</div><div class="role">CN. CLB SBG</div></div>
+          <a class="phone" href="tel:0832415045">083 2415 045</a>
+        </div>
+        <div class="contact-card">
+          <div class="who"><div class="name">Lê Nhựt Quốc Khang</div><div class="role">CN. CLB ATTT</div></div>
+          <a class="phone" href="tel:0374477202">037 4477 202</a>
+        </div>
+        <div class="contact-card">
+          <div class="who"><div class="name">Hồ Việt Anh</div><div class="role">CN. RTIC</div></div>
+          <a class="phone" href="tel:0949000030">094 9000 030</a>
+        </div>
+        <div class="contact-card">
+          <div class="who"><div class="name">Mai Hồng Tín</div><div class="role">Chủ nhiệm CLB DSC</div></div>
+          <a class="phone" href="tel:0782882461">078 2882 461</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p class="org">Khoa Công nghệ Thông tin — Trường Đại học Công nghệ Kỹ thuật TP.HCM (HCM-UTE)</p>
+    <p>Phối hợp tổ chức: Đoàn Thanh niên · Hội Sinh viên Việt Nam · CLB SBG · CLB ATTT · RTIC · DSC</p>
+    <p>© 2026 FIT Club's Day. Mọi quyền được bảo lưu.</p>
+  </div>
+</footer>
+
+</body>
+</html>
