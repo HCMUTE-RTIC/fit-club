@@ -108,7 +108,14 @@ async def lifespan(app):
 
 app = FastAPI(title='FIT Club Day API', version='1.0.0', lifespan=lifespan)
 app.mount('/assets', StaticFiles(directory=Path(__file__).resolve().parents[2] / 'assets'), name='assets')
-app.add_middleware(CORSMiddleware, allow_origins=[x.strip() for x in settings.cors_origins.split(',')], allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Authorization', 'Content-Type'])
+_cors_list = [x.strip() for x in settings.cors_origins.split(',') if x.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'] if '*' in _cors_list or not _cors_list else _cors_list,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 bearer = HTTPBearer()
 
 
