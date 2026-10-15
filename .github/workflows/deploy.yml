@@ -1,0 +1,43 @@
+name: CI/CD Pipeline - FIT CLUB
+
+on:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci-and-deploy:
+    runs-on: [ self-hosted, linux, x64, fit-club-deploy ]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python & Run Tests (CI)
+        run: |
+          cd backend
+          if [ ! -d ".venv" ]; then
+            python3 -m venv .venv
+          fi
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          PYTHONPATH=. .venv/bin/pytest tests/test_frontend.py
+
+      - name: Deploy to Production
+        run: |
+          DEPLOY_DIR="/home/phuc/FIT-CLUB"
+          echo "Deploying latest changes to $DEPLOY_DIR..."
+          cd "$DEPLOY_DIR"
+          git fetch origin main
+          git reset --hard origin/main
+          
+          cd backend
+          .venv/bin/pip install -r requirements.txt
+          
+          sudo systemctl restart fit-club.service
+          sudo systemctl is-active --quiet fit-club.service
+          
+          echo "Deployment completed successfully!"
