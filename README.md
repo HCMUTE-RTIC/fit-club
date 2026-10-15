@@ -4,13 +4,15 @@ Dự án quản lý và điểm danh tự động qua mã QR cho sự kiện **F
 
 ## Production URL
 
+- **Landing Page:** https://fit.caohoangphuc.id.vn/landingpage
 - **Backend API Base URL:** `https://fit.caohoangphuc.id.vn`
 - **Swagger API Docs:** https://fit.caohoangphuc.id.vn/docs
 - **ReDoc API Docs:** https://fit.caohoangphuc.id.vn/redoc
 
 ## Cấu trúc dự án
 
+- `landingpage.html`: Giao diện landing page chính thức của sự kiện (phục vụ tại `/landingpage`).
 - `backend/`: FastAPI backend xác thực Google OAuth (email sinh viên `@student.hcmute.edu.vn`), tạo & xác thực mã QR cá nhân, quản lý sự kiện và xuất nhập Excel điểm danh.
-- `frontend/`: Giao diện web hỗ trợ camera quét QR và các tính năng admin / sinh viên.
+- `frontend/`: Giao diện web hỗ trợ camera quét QR và các tính năng admin / sinh viên (phục vụ tại `/ui` và `/`).
 - `assets/`: Bộ nhận diện, banner, logo các CLB học thuật và poster sự kiện.
 - `content/`: Thông tin sự kiện và tài liệu giới thiệu.

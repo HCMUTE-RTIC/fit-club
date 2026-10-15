@@ -14,6 +14,10 @@ def test_public_login_shell_and_static_assets(api):
         assert asset.status_code == 200
         assert content_type in asset.headers['content-type']
 
+    landing = api.get('/landingpage')
+    assert landing.status_code == 200
+    assert 'FIT Club Day 2026' in landing.text
+
 
 def test_public_config_reports_active_policy_without_secrets(api, monkeypatch):
     monkeypatch.setattr(m.settings, 'google_client_id', 'public-test.apps.googleusercontent.com')
