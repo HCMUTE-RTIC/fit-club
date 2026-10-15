@@ -13,6 +13,8 @@ Dự án quản lý và điểm danh tự động qua mã QR cho sự kiện **F
 
 - `landingpage.html`: Giao diện landing page chính thức của sự kiện (phục vụ tại `/landingpage`).
 - `backend/`: FastAPI backend xác thực Google OAuth (email sinh viên `@student.hcmute.edu.vn`), tạo & xác thực mã QR cá nhân, quản lý sự kiện và xuất nhập Excel điểm danh.
-- `frontend/`: Giao diện web hỗ trợ camera quét QR và các tính năng admin / sinh viên (phục vụ tại `/ui` và `/`).
+- `frontend/`: Giao diện web hỗ trợ camera quét QR và các tính năng admin / sinh viên (**chỉ là bản Demo / Test chức năng**, phục vụ tại `/ui` và `/`).
 - `assets/`: Bộ nhận diện, banner, logo các CLB học thuật và poster sự kiện.
 - `content/`: Thông tin sự kiện và tài liệu giới thiệu.
+
+> **Lưu ý về Frontend:** Giao diện tại `frontend/` hiện tại chỉ đóng vai trò là bản **Demo / Test UI** để kiểm thử luồng đăng nhập, tạo QR, camera quét QR và xuất nhập dữ liệu với Backend. Giao diện chính thức phục vụ sự kiện sẽ được phát triển riêng hoặc tích hợp sau.
