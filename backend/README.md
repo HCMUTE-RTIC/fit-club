@@ -1,9 +1,15 @@
 # FIT Club Day — FastAPI backend
 
+## Production Backend URL
+
+- **API Base URL:** `https://fit.caohoangphuc.id.vn`
+- **Swagger UI:** https://fit.caohoangphuc.id.vn/docs
+- **ReDoc:** https://fit.caohoangphuc.id.vn/redoc
+
 ## Chạy local
 
 ```sh
-cd /home/FIT-CLUB/backend
+cd backend
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env
@@ -11,7 +17,7 @@ cp .env.example .env
 .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Swagger: http://localhost:8000/docs. Đây là backend API; giao diện landing page và màn hình camera sẽ tích hợp sau.
+Swagger local: http://localhost:8000/docs. Đây là backend API; giao diện landing page và màn hình camera sẽ tích hợp sau.
 
 Google Cloud: tạo OAuth client loại Web application; thêm Authorized JavaScript origins của frontend. Frontend dùng Google Identity Services lấy `credential` (ID token), gửi POST `/auth/google` với JSON `{"credential":"..."}`. Backend xác minh chữ ký, audience, issuer, hạn token bằng google-auth; yêu cầu `email_verified=true`, `hd=student.hcmute.edu.vn`, email khớp MSSV số 6–15 ký tự. Không có mật khẩu hay API đăng nhập giả trong ứng dụng. Họ tên lấy từ Google, MSSV lấy phần trước @. Thư viện xác minh cần truy cập chứng thư Google qua internet.
 
