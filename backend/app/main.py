@@ -190,6 +190,8 @@ def get_event(session, event_id):
 
 def manage(session, user, event_id):
     item = get_event(session, event_id)
+    if not is_super(user) and session.scalar(select(Club.id).where(Club.event_id == event_id).limit(1)) is not None:
+        raise HTTPException(403, 'Sự kiện dùng phân quyền CLB. Hãy quản lý qua gian hàng được gán.')
     if not is_super(user) and not session.get(EventAdmin, (event_id, user.id)):
         raise HTTPException(403, 'Bạn không phải admin của sự kiện này')
     return item
@@ -247,7 +249,8 @@ def login(body: GoogleLogin, session: Session = Depends(db)):
 @app.get('/auth/me')
 def me(user: User = Depends(current), session: Session = Depends(db)):
     ids = list(session.scalars(select(EventAdmin.event_id).where(EventAdmin.user_id == user.id)))
-    return {**profile(user), 'role': 'superadmin' if is_super(user) else 'admin' if ids else 'student', 'admin_event_ids': ids}
+    club_ids = list(session.scalars(select(ClubAdmin.club_id).where(ClubAdmin.user_id == user.id)))
+    return {**profile(user), 'role': 'superadmin' if is_super(user) else 'admin' if ids or club_ids else 'student', 'admin_event_ids': ids, 'admin_club_ids': club_ids}
 
 
 class EventInput(BaseModel):
@@ -305,7 +308,7 @@ def update_event(event_id: int, body: EventInput, user: User = Depends(superuser
 def events(user: User = Depends(current), session: Session = Depends(db)):
     query = select(Event).order_by(Event.starts_at.desc())
     if not is_super(user):
-        query = query.where(or_(Event.id.in_(select(Registration.event_id).where(Registration.user_id == user.id)), Event.id.in_(select(EventAdmin.event_id).where(EventAdmin.user_id == user.id))))
+        query = query.where(or_(Event.id.in_(select(Registration.event_id).where(Registration.user_id == user.id)), Event.id.in_(select(EventAdmin.event_id).where(EventAdmin.user_id == user.id)), Event.id.in_(select(Club.event_id).join(ClubAdmin, ClubAdmin.club_id == Club.id).where(ClubAdmin.user_id == user.id))))
     return [event_data(e) for e in session.scalars(query)]
 
 
@@ -398,10 +401,8 @@ def template(event_id: int, user: User = Depends(current), session: Session = De
     return workbook_response(['student_id', 'full_name', 'email'], [], 'students-template.xlsx')
 
 
-@app.post('/events/{event_id}/students/import')
-async def import_students(event_id: int, file: UploadFile = File(...), user: User = Depends(current), session: Session = Depends(db)):
-    manage(session, user, event_id)
-    content = await file.read(5 * 1024 * 1024 + 1)
+def parse_student_excel(content):
+    """Validate the entire workbook before either event or club imports write data."""
     if len(content) > 5 * 1024 * 1024:
         raise HTTPException(413, 'File tối đa 5 MB')
     try:
@@ -437,6 +438,14 @@ async def import_students(event_id: int, file: UploadFile = File(...), user: Use
         book.close()
     except (ValueError, zipfile.BadZipFile, KeyError, StopIteration, TypeError, ParseError, OSError, InvalidFileException) as exc:
         raise HTTPException(422, f'Không đọc được Excel: {exc}')
+    return valid, errors, duplicates
+
+
+@app.post('/events/{event_id}/students/import')
+def import_students(event_id: int, file: UploadFile = File(...), user: User = Depends(current), session: Session = Depends(db)):
+    manage(session, user, event_id)
+    content = file.file.read(5 * 1024 * 1024 + 1)
+    valid, errors, duplicates = parse_student_excel(content)
     if errors:
         return {'imported': 0, 'errors': errors, 'duplicates': duplicates, 'message': 'Chưa nhập dòng nào. Sửa các dòng lỗi rồi tải lại.'}
     imported = 0
@@ -567,6 +576,9 @@ def revoke_superadmin(user_id: int, user: User = Depends(superuser), session: Se
     session.delete(role)
     session.commit()
 
+
+from .clubs import Club, ClubAdmin, router as club_router
+app.include_router(club_router)
 
 from .frontend import register_frontend
 register_frontend(app)

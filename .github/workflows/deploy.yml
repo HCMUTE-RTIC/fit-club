@@ -24,7 +24,7 @@ jobs:
           fi
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
-          PYTHONPATH=. .venv/bin/pytest tests/test_frontend.py
+          PYTHONPATH=. .venv/bin/pytest -q --ignore=tests/test_browser.py
 
       - name: Deploy to Production
         run: |

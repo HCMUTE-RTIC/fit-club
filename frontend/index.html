@@ -1,11 +1,1041 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FIT Club • Test điểm danh</title><link rel="stylesheet" href="/ui/style.css"><script src="https://accounts.google.com/gsi/client" async defer></script><script src="/ui/app.js" defer></script></head><body>
-<header><div><strong>FIT CLUB</strong><span>Hệ thống sự kiện & điểm danh · Bản test</span></div><a href="/docs" target="_blank" rel="noopener">API Docs ↗</a></header>
-<main><section id="login" class="card"><h1>Đăng nhập để bắt đầu</h1><p id="policy">Đang tải cấu hình Google…</p><div id="google-button"></div><p id="login-note"></p></section>
-<section id="workspace" hidden><div class="identity card"><div><h2 id="my-name"></h2><p id="my-info"></p></div><button id="logout" class="secondary">Đăng xuất</button></div>
-<div id="super-tools" class="card" hidden><h2>Quản trị hệ thống</h2><details><summary>Tạo sự kiện</summary><form id="create-event"><label>Tên<input name="title" required></label><label>Mô tả<textarea name="description"></textarea></label><label>Thời gian bắt đầu (giờ Việt Nam)<input name="starts_at" type="datetime-local" required></label><label>URL ảnh<input name="image_url" placeholder="https://… hoặc /assets/…"></label><button>Tạo sự kiện</button></form></details><details><summary>Cấp quyền superadmin</summary><form id="grant-super"><label>Email Google<input name="email" type="email" required></label><label>Họ tên<input name="name" required></label><button>Cấp quyền</button></form></details></div>
-<div class="card"><div class="row"><h2>Sự kiện của bạn</h2><button id="reload" class="secondary">Tải lại</button></div><label>Chọn sự kiện<select id="events"><option value="">Chọn sự kiện…</option></select></label><p id="empty"></p></div>
-<section id="event-panel" hidden><div class="card"><h2 id="event-title"></h2><p id="event-description"></p><p id="event-time"></p><strong id="event-status"></strong><div id="event-super" hidden><button id="toggle-checkin">Mở điểm danh</button><details><summary>Thêm admin cho sự kiện</summary><form id="add-admin"><label>Email<input name="email" type="email" required></label><label>Họ tên<input name="name" required></label><button>Thêm admin</button></form><div id="admins"></div></details></div></div>
-<div class="card"><h2>QR của tôi</h2><p>Chỉ sinh viên đã được thêm vào sự kiện mới có QR. Điểm danh cần đang mở.</p><button id="get-qr">Tạo / làm mới QR</button><div id="qr"></div></div>
-<div id="admin-tools" hidden><div class="card"><h2>Điểm danh sinh viên</h2><p>Quét camera hoặc dán nội dung QR. Trình duyệt cần cho phép truy cập camera.</p><div class="row"><button id="camera-start">Bật camera</button><button id="camera-stop" class="secondary">Tắt camera</button></div><video id="camera" autoplay muted playsinline hidden></video><form id="scan"><label>Nội dung QR<textarea name="token" required placeholder="Dán token QR ở đây"></textarea></label><button>Điểm danh</button></form><p id="scan-result" role="status"></p></div>
-<div class="card"><h2>Danh sách sinh viên</h2><details><summary>Thêm từng sinh viên</summary><form id="add-student"><label>Email<input name="email" type="email" required></label><label>Họ tên<input name="name" required></label><button>Thêm sinh viên</button></form></details><div class="row"><button id="template" class="secondary">Tải mẫu Excel</button><button id="export" class="secondary">Xuất kết quả Excel</button></div><form id="import"><label>Nhập sinh viên từ Excel<input type="file" name="file" accept=".xlsx" required></label><button>Import Excel</button></form><pre id="import-result"></pre><form id="filter" class="row"><label>Tìm MSSV / mã tài khoản<input name="search" placeholder="Nhập mã"></label><label>Trạng thái<select name="attended"><option value="">Tất cả</option><option value="true">Đã điểm danh</option><option value="false">Chưa điểm danh</option></select></label><button>Tìm</button></form><div class="table-wrap"><table><thead><tr><th>MSSV / mã</th><th>Họ tên</th><th>Email</th><th>Trạng thái</th><th>Thời gian</th></tr></thead><tbody id="students"></tbody></table></div><div class="row"><button id="prev" class="secondary">← Trước</button><span id="page"></span><button id="next" class="secondary">Sau →</button></div></div></div></section></section>
-<div id="notice" role="status" hidden></div></main></body></html>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#10254b" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/assets/bo-logo/ban-cat-goc/09-club-day-2026.png"
+    />
+    <title>FIT Club Day · Không gian sự kiện</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/ui/style.css" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/ui/app.js" defer></script>
+  </head>
+  <body>
+    <svg
+      class="icon-library"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <symbol id="i-grid" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3" />
+        <path
+          d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v2"
+        />
+      </symbol>
+      <symbol id="i-scan" viewBox="0 0 24 24">
+        <path
+          d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m13-5v4a1 1 0 0 1-1 1h-4M3 12h18"
+        />
+        <rect x="8" y="7" width="8" height="10" rx="1" />
+      </symbol>
+      <symbol id="i-ticket" viewBox="0 0 24 24">
+        <path d="M3 8V5h18v3a4 4 0 0 0 0 8v3H3v-3a4 4 0 0 0 0-8Z" />
+        <path d="M15 5v3m0 3v2m0 3v3" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <path
+          d="m10 3-1 3-3 1-3 3 2 2-1 3 3 3 3-1 2 2 3-1 1-3 3-1 1-4-3-1-1-3-3-1Z"
+        />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 12h14m-5-5 5 5-5 5" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path
+          d="M20 7v5h-5M4 17v-5h5M5 8a8 8 0 0 1 13-3l2 3M4 16l2 3a8 8 0 0 0 13-3"
+        />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5" />
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M12 16V4m-4 4 4-4 4 4M4 16v5h16v-5" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M6 18 18 6" />
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24">
+        <path d="M9 4H3v16h6m0-8h12m-4-4 4 4-4 4" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z" />
+        <path d="m8 12 3 3 5-6" />
+      </symbol>
+      <symbol id="i-store" viewBox="0 0 24 24">
+        <path
+          d="m3 9 2-6h14l2 6M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M4 12v9h16v-9M9 21v-6h6v6"
+        />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6m0-10v1" />
+      </symbol>
+    </svg>
+    <a class="skip-link" href="#main-content">Đến nội dung chính</a>
+    <section id="login" class="login-page">
+      <div class="login-story">
+        <a class="brand" href="/landingpage"
+          ><img
+            class="brand-event-logo"
+            src="/assets/bo-logo/ban-cat-goc/09-club-day-2026.png"
+            alt="FIT Club Day 2026"
+            width="64"
+            height="46"
+          />
+          <span>FIT CLUB DAY<small>HCMUTE · 2026</small></span></a
+        >
+        <div class="login-editorial">
+          <span class="eyebrow light">KẾT NỐI · KHÁM PHÁ · BỨT PHÁ</span>
+          <h1>
+            Một ngày hội.<br />Nhiều kết nối.<br /><em>Vô vàn trải nghiệm.</em>
+          </h1>
+          <p>
+            Gặp gỡ các câu lạc bộ học thuật,<br />khám phá công nghệ và viết
+            tiếp hành trình của bạn.
+          </p>
+          <a class="story-link" href="/landingpage"
+            >Khám phá FIT Club Day
+            <svg class="icon"><use href="#i-arrow" /></svg
+          ></a>
+        </div>
+        <div class="login-partners">
+          <span>CÙNG CỘNG ĐỒNG CÔNG NGHỆ HCMUTE</span>
+          <div>
+            <img
+              src="/assets/brand/hcmute.png"
+              alt="HCMUTE"
+              width="48"
+              height="48"
+            /><img src="/assets/brand/fit.png" alt="Khoa CNTT" /><img
+              src="/assets/brand/rtic.png"
+              alt="RTIC"
+            /><img src="/assets/brand/dsc.png" alt="DSC" />
+          </div>
+        </div>
+      </div>
+      <div class="login-side">
+        <div class="login-box">
+          <span class="eyebrow">KHÔNG GIAN SỰ KIỆN</span>
+          <h2>Chào bạn,<br />hẹn gặp tại FIT!</h2>
+          <p>
+            Đăng nhập để nhận vé tham gia và điểm danh tại các gian hàng câu lạc
+            bộ.
+          </p>
+          <div id="google-button"></div>
+          <p id="policy" class="hint">Đang tải phương thức đăng nhập…</p>
+          <p id="login-note" role="status" class="inline-note"></p>
+          <div class="login-security">
+            <svg class="icon"><use href="#i-shield" /></svg
+            ><span>Tài khoản của bạn được xác thực qua Google.</span>
+          </div>
+        </div>
+        <footer>
+          FIT Club Day 2026 <span>Được kết nối bởi cộng đồng.</span>
+        </footer>
+      </div>
+    </section>
+    <div id="workspace" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="/landingpage"
+          ><img
+            class="brand-event-logo"
+            src="/assets/bo-logo/ban-cat-goc/09-club-day-2026.png"
+            alt="FIT Club Day 2026"
+            width="64"
+            height="46"
+          />
+          <span>FIT CLUB DAY<small>KHÔNG GIAN SỰ KIỆN</small></span></a
+        >
+        <span class="nav-label">KHÔNG GIAN CỦA BẠN</span>
+        <nav aria-label="Điều hướng chính">
+          <button class="nav-item active" data-nav="overview">
+            <svg class="icon"><use href="#i-grid" /></svg><span>Tổng quan</span>
+          </button>
+          <button class="nav-item" data-nav="participants" data-manager hidden>
+            <svg class="icon"><use href="#i-users" /></svg
+            ><span>Người tham gia</span>
+          </button>
+          <button class="nav-item" data-nav="checkin" data-manager hidden>
+            <svg class="icon"><use href="#i-scan" /></svg
+            ><span>Quét điểm danh</span>
+          </button>
+          <button class="nav-item" data-nav="ticket">
+            <svg class="icon"><use href="#i-ticket" /></svg
+            ><span>Vé của tôi</span>
+          </button>
+          <button class="nav-item" data-nav="settings" data-super hidden>
+            <svg class="icon"><use href="#i-settings" /></svg
+            ><span>Quản trị</span>
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-event">
+            <span class="eyebrow light">WHERE TECH MEETS DREAMS</span
+            ><strong>Cùng tạo nên<br />một ngày hội đáng nhớ.</strong
+            ><span class="sidebar-orbit" aria-hidden="true">✳</span
+            ><a href="/landingpage">Về trang sự kiện <span>↗</span></a>
+          </div>
+          <div class="sidebar-footer">
+            <span class="status-dot"></span> FIT · HCMUTE <span>2026</span>
+          </div>
+        </div>
+      </aside>
+      <div class="app-main">
+        <header class="topbar">
+          <div class="topbar-identity">
+            <a
+              class="institution-marks"
+              href="/landingpage"
+              aria-label="FIT Club Day · Khoa CNTT HCMUTE"
+            >
+              <img
+                src="/assets/brand/hcmute.png"
+                alt="HCMUTE"
+                width="32"
+                height="38"
+              />
+              <img
+                src="/assets/brand/fit.png"
+                alt="Khoa Công nghệ Thông tin HCMUTE"
+                width="52"
+                height="38"
+              />
+            </a>
+            <div class="breadcrumb">
+              Không gian sự kiện <span>/</span
+              ><strong id="breadcrumb">Tổng quan</strong>
+            </div>
+          </div>
+          <div class="topbar-account">
+            <span class="avatar" id="my-avatar"></span>
+            <div><strong id="my-name"></strong><span id="my-role"></span></div>
+            <button
+              id="logout"
+              class="icon-button"
+              aria-label="Đăng xuất"
+              title="Đăng xuất"
+            >
+              <svg class="icon"><use href="#i-logout" /></svg>
+            </button>
+          </div>
+        </header>
+        <main id="main-content" class="page-content" tabindex="-1">
+          <div id="offline" class="alert warning" hidden>
+            Bạn đang ngoại tuyến. Kết nối mạng để cập nhật dữ liệu và điểm danh.
+          </div>
+          <div class="page-heading">
+            <div>
+              <span class="eyebrow" id="page-eyebrow"
+                >SẴN SÀNG CHO NGÀY HỘI</span
+              >
+              <h1 id="page-title">Tổng quan sự kiện</h1>
+              <p id="page-description">Mỗi kết nối là một khởi đầu mới.</p>
+            </div>
+            <div class="actions">
+              <button id="reload" class="button secondary">
+                <svg class="icon"><use href="#i-refresh" /></svg
+                ><span>Làm mới</span></button
+              ><button id="new-event" data-super class="button" hidden>
+                <svg class="icon"><use href="#i-plus" /></svg>Tạo sự kiện
+              </button>
+            </div>
+          </div>
+          <div class="context-bar">
+            <label
+              >Sự kiện<select id="events" aria-label="Chọn sự kiện">
+                <option value="">Chọn sự kiện…</option>
+              </select></label
+            >
+            <div class="context-divider"></div>
+            <label
+              >Gian hàng câu lạc bộ<select
+                id="clubs"
+                aria-label="Chọn câu lạc bộ"
+              >
+                <option value="">Chọn CLB…</option>
+              </select></label
+            ><span id="scope-label" class="scope-note"
+              ><svg class="icon"><use href="#i-shield" /></svg
+              ><span>Dữ liệu theo CLB</span></span
+            >
+          </div>
+          <div id="page-error" class="alert danger" role="alert" hidden></div>
+          <div
+            id="loading"
+            class="loading-layout"
+            aria-label="Đang tải dữ liệu"
+            hidden
+          >
+            <div class="skeleton skeleton-hero"></div>
+            <div class="skeleton skeleton-content"></div>
+          </div>
+          <section id="empty-state" class="empty-state" hidden>
+            <span class="empty-icon"
+              ><svg class="icon"><use href="#i-store" /></svg
+            ></span>
+            <h2 id="empty-title">Chưa có sự kiện dành cho bạn</h2>
+            <p id="empty-message">
+              Liên hệ ban tổ chức để được thêm vào danh sách tham gia.
+            </p>
+            <button class="button" id="empty-action" data-super hidden>
+              Thiết lập sự kiện
+            </button>
+          </section>
+          <div id="event-panel" hidden>
+            <section data-view="overview">
+              <div class="event-hero">
+                <div class="hero-content">
+                  <span class="eyebrow light"
+                    >KHÁM PHÁ CÔNG NGHỆ, KẾT NỐI ĐAM MÊ</span
+                  >
+                  <h2 id="event-title"></h2>
+                  <p id="hero-subtitle"></p>
+                  <div class="hero-meta">
+                    <span
+                      ><svg class="icon"><use href="#i-calendar" /></svg
+                      ><span id="event-time"></span></span
+                    ><span id="event-status" class="badge"></span>
+                  </div>
+                </div>
+                <div class="hero-art event-brand-art">
+                  <div id="hero-club-brand"></div>
+                  <span class="hero-art-label" id="hero-brand-label"
+                    >FIT CLUB DAY 2026</span
+                  >
+                  <span class="hero-spark" aria-hidden="true">✳</span>
+                </div>
+              </div>
+              <div id="manager-overview" hidden>
+                <div class="stats-grid">
+                  <article class="stat-card">
+                    <span class="stat-icon blue"
+                      ><svg class="icon"><use href="#i-users" /></svg
+                    ></span>
+                    <div>
+                      <span id="registered-label">Người tham gia</span
+                      ><strong id="stat-registered">—</strong
+                      ><small>Trong danh sách đã đăng ký</small>
+                    </div>
+                    <span class="stat-number">01</span>
+                  </article>
+                  <article class="stat-card">
+                    <span class="stat-icon green"
+                      ><svg class="icon"><use href="#i-check" /></svg
+                    ></span>
+                    <div>
+                      <span id="attended-label">Đã điểm danh</span
+                      ><strong id="stat-attended">—</strong
+                      ><small>Được xác nhận tại gian hàng</small>
+                    </div>
+                    <span class="stat-number">02</span>
+                  </article>
+                  <article class="stat-card">
+                    <span class="stat-icon amber"
+                      ><svg class="icon"><use href="#i-clock" /></svg
+                    ></span>
+                    <div>
+                      <span>Chờ điểm danh</span
+                      ><strong id="stat-pending">—</strong
+                      ><small>Sẵn sàng cho những kết nối mới</small>
+                    </div>
+                    <span class="stat-number">03</span>
+                  </article>
+                </div>
+                <div class="overview-grid">
+                  <article class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <span class="eyebrow">BỨC TRANH TỔNG THỂ</span>
+                        <h2>Tiến độ điểm danh</h2>
+                      </div>
+                      <span class="badge neutral" id="progress-scope"></span>
+                    </div>
+                    <div class="progress-layout">
+                      <div
+                        class="donut"
+                        id="attendance-donut"
+                        role="img"
+                        aria-label="Tỷ lệ điểm danh"
+                      >
+                        <div>
+                          <strong id="stat-rate">0%</strong
+                          ><span>đã điểm danh</span>
+                        </div>
+                      </div>
+                      <div class="progress-details">
+                        <p>
+                          Mỗi lượt ghé thăm,<br /><strong
+                            >thêm một kết nối.</strong
+                          >
+                        </p>
+                        <div>
+                          <span class="legend blue-dot">Đã điểm danh</span
+                          ><strong id="legend-attended">0</strong>
+                        </div>
+                        <div>
+                          <span class="legend gray-dot">Chờ điểm danh</span
+                          ><strong id="legend-pending">0</strong>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="panel-foot" id="summary-note"></div>
+                  </article>
+                  <article class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <span class="eyebrow">CẬP NHẬT GẦN NHẤT</span>
+                        <h2 id="activity-title">Vừa ghé gian hàng</h2>
+                      </div>
+                      <span class="live-label"
+                        ><span class="status-dot"></span>Đã đồng bộ</span
+                      >
+                    </div>
+                    <div id="recent-list" class="recent-list"></div>
+                  </article>
+                </div>
+                <article id="club-board-panel" class="panel" hidden>
+                  <div class="panel-heading">
+                    <div>
+                      <span class="eyebrow">CÙNG NHAU TẠO DẤU ẤN</span>
+                      <h2>Các gian hàng CLB</h2>
+                    </div>
+                    <button class="button secondary" id="new-club">
+                      <svg class="icon"><use href="#i-plus" /></svg>Thêm CLB
+                    </button>
+                  </div>
+                  <div id="club-board" class="club-board"></div>
+                </article>
+              </div>
+              <div id="student-overview" class="overview-grid" hidden>
+                <article class="panel personal-welcome">
+                  <span class="eyebrow">HÀNH TRÌNH CỦA BẠN</span>
+                  <h2 id="student-status-title">Sẵn sàng khám phá?</h2>
+                  <p id="student-status-text">
+                    Mở vé cá nhân và đưa mã QR cho admin tại gian hàng để xác
+                    nhận tham gia.
+                  </p>
+                  <button class="button" data-go="ticket">
+                    Mở vé của tôi
+                    <svg class="icon"><use href="#i-arrow" /></svg>
+                  </button>
+                </article>
+                <article class="panel">
+                  <span class="eyebrow">MỘT CHÚT CHUẨN BỊ</span>
+                  <h2>Gặp nhau tại gian hàng</h2>
+                  <ol class="steps">
+                    <li>
+                      <span>01</span>
+                      <div>
+                        <strong>Chọn đúng câu lạc bộ</strong>
+                        <p>Mỗi gian hàng có vé và kết quả riêng.</p>
+                      </div>
+                    </li>
+                    <li>
+                      <span>02</span>
+                      <div>
+                        <strong>Hiển thị mã QR cá nhân</strong>
+                        <p>Mã tự làm mới trong lúc bạn mở vé.</p>
+                      </div>
+                    </li>
+                    <li>
+                      <span>03</span>
+                      <div>
+                        <strong>Để admin xác nhận</strong>
+                        <p>Trạng thái tham gia sẽ xuất hiện trên vé.</p>
+                      </div>
+                    </li>
+                  </ol>
+                </article>
+              </div>
+            </section>
+            <section data-view="participants" hidden>
+              <article class="panel table-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h2>
+                      Danh sách người tham gia
+                      <span class="count-pill" id="student-total">0</span>
+                    </h2>
+                    <p>Danh sách và kết quả riêng của CLB đang chọn.</p>
+                  </div>
+                  <div class="actions">
+                    <button id="export" class="button secondary">
+                      <svg class="icon"><use href="#i-download" /></svg>Xuất
+                      Excel</button
+                    ><button id="open-import" class="button secondary">
+                      <svg class="icon"><use href="#i-upload" /></svg>Nhập Excel</button
+                    ><button id="add-student" class="button">
+                      <svg class="icon"><use href="#i-plus" /></svg>Thêm người
+                    </button>
+                  </div>
+                </div>
+                <form id="filter" class="filter-bar">
+                  <label class="search-field"
+                    ><svg class="icon"><use href="#i-search" /></svg
+                    ><span class="sr-only">Tìm người tham gia</span
+                    ><input
+                      name="search"
+                      type="search"
+                      aria-label="Tìm người tham gia"
+                      placeholder="Tìm theo họ tên, MSSV hoặc email"
+                      maxlength="200" /></label
+                  ><label
+                    ><span class="sr-only">Trạng thái điểm danh</span
+                    ><select name="attended" aria-label="Trạng thái điểm danh">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="true">Đã điểm danh</option>
+                      <option value="false">Chưa điểm danh</option>
+                    </select></label
+                  ><button class="button secondary">Tìm kiếm</button>
+                </form>
+                <div class="table-wrap">
+                  <table>
+                    <caption class="sr-only">
+                      Danh sách người tham gia CLB
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Người tham gia</th>
+                        <th scope="col">MSSV / mã</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Thời gian điểm danh</th>
+                      </tr>
+                    </thead>
+                    <tbody id="students"></tbody>
+                  </table>
+                </div>
+                <div id="table-empty" class="table-empty" hidden>
+                  Chưa có kết quả. Thử đổi bộ lọc hoặc thêm người tham gia.
+                </div>
+                <div class="pagination">
+                  <span id="page"></span>
+                  <div class="actions">
+                    <button
+                      id="prev"
+                      class="button secondary"
+                      aria-label="Trang trước"
+                    >
+                      ←</button
+                    ><span id="page-number" class="page-number">1</span
+                    ><button
+                      id="next"
+                      class="button secondary"
+                      aria-label="Trang sau"
+                    >
+                      →
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </section>
+            <section data-view="checkin" hidden>
+              <div class="scanner-grid">
+                <article class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="eyebrow">CHÀO ĐÓN NHỮNG KẾT NỐI MỚI</span>
+                      <h2>Quét mã QR cá nhân</h2>
+                    </div>
+                    <span class="badge neutral" id="scanner-club"></span>
+                  </div>
+                  <div class="camera-stage">
+                    <video
+                      id="camera"
+                      autoplay
+                      muted
+                      playsinline
+                      hidden
+                    ></video>
+                    <div id="camera-placeholder">
+                      <svg class="icon"><use href="#i-scan" /></svg
+                      ><strong>Sẵn sàng đón bạn</strong>
+                      <p>
+                        Đặt mã QR vào khung hình<br />để xác nhận tham gia gian
+                        hàng.
+                      </p>
+                    </div>
+                    <div class="scan-frame" aria-hidden="true"></div>
+                    <span class="camera-caption" id="camera-state"
+                      >Camera đang tắt</span
+                    >
+                  </div>
+                  <div class="camera-controls">
+                    <button id="camera-start" class="button">
+                      <svg class="icon"><use href="#i-scan" /></svg>Bật camera</button
+                    ><button id="camera-stop" class="button secondary" hidden>
+                      Tắt camera</button
+                    ><label class="button secondary file-button"
+                      ><svg class="icon"><use href="#i-upload" /></svg>Chọn ảnh
+                      QR<input
+                        id="qr-file"
+                        type="file"
+                        accept="image/*"
+                        class="sr-only"
+                    /></label>
+                  </div>
+                  <p class="hint">
+                    Cho phép camera để quét trực tiếp, hoặc chọn ảnh có mã QR.
+                  </p>
+                </article>
+                <div>
+                  <article class="panel">
+                    <span class="eyebrow">ĐÚNG GIAN HÀNG, ĐÚNG KẾT NỐI</span>
+                    <h2 id="checkin-club-name"></h2>
+                    <p>
+                      Chỉ xác nhận cho người thuộc danh sách CLB này. Mã QR ở
+                      gian hàng khác sẽ được thông báo để bạn kiểm tra lại.
+                    </p>
+                    <div id="scan-result" class="scan-result" role="status">
+                      <svg class="icon"><use href="#i-scan" /></svg
+                      ><span>Chưa có lượt quét nào trong phiên này.</span>
+                    </div>
+                    <button
+                      id="toggle-club"
+                      class="button secondary full-width"
+                    ></button>
+                  </article>
+                  <details class="panel manual-entry">
+                    <summary>Nhập mã dự phòng</summary>
+                    <form id="scan">
+                      <label
+                        >Nội dung mã QR<textarea
+                          name="token"
+                          required
+                          maxlength="4000"
+                          rows="3"
+                          placeholder="Dán nội dung mã QR nếu không thể dùng camera"
+                        ></textarea></label
+                      ><button class="button">Xác nhận điểm danh</button>
+                    </form>
+                  </details>
+                </div>
+              </div>
+            </section>
+            <section data-view="ticket" hidden>
+              <div class="ticket-layout">
+                <article class="event-ticket">
+                  <div class="ticket-top">
+                    <div class="ticket-branding">
+                      <span class="eyebrow light">VÉ THAM GIA CÁ NHÂN</span>
+                      <img
+                        class="ticket-event-logo"
+                        src="/assets/bo-logo/ban-cat-goc/09-club-day-2026.png"
+                        alt="FIT Club Day 2026"
+                        width="80"
+                        height="50"
+                      />
+                    </div>
+                    <div class="ticket-club-identity">
+                      <div id="ticket-club-brand"></div>
+                      <h2 id="ticket-club-name"></h2>
+                    </div>
+                    <p id="ticket-event-title"></p>
+                  </div>
+                  <div class="ticket-body">
+                    <div class="ticket-person">
+                      <span class="avatar large" id="ticket-avatar"></span>
+                      <div>
+                        <h3 id="ticket-name"></h3>
+                        <span id="ticket-student-id"></span>
+                      </div>
+                    </div>
+                    <div id="ticket-status" class="alert"></div>
+                    <div id="qr" class="qr-area">
+                      <svg class="icon"><use href="#i-ticket" /></svg>
+                      <p>Mã QR sẽ hiển thị tại đây.</p>
+                    </div>
+                    <div id="qr-countdown" class="qr-countdown" hidden>
+                      <span class="status-dot"></span><span id="qr-time"></span
+                      ><progress
+                        id="qr-progress"
+                        max="120"
+                        value="120"
+                        aria-label="Thời gian hiệu lực mã QR"
+                      ></progress>
+                    </div>
+                    <button id="get-qr" class="button full-width">
+                      Hiển thị mã QR
+                    </button>
+                    <p class="hint center">
+                      Mỗi mã chỉ dùng cho gian hàng đang chọn.<br />Giữ mã trên
+                      thiết bị của bạn khi điểm danh.
+                    </p>
+                  </div>
+                  <div class="ticket-bottom">
+                    <span>HCMUTE · FIT CLUB DAY</span
+                    ><span>LET'S CONNECT ↗</span>
+                  </div>
+                </article>
+                <article class="panel ticket-help">
+                  <span class="eyebrow">BẠN ĐÃ SẴN SÀNG</span>
+                  <h2>Một lần quét.<br />Một dấu ấn mới.</h2>
+                  <p>
+                    Đưa mã QR này cho admin tại gian hàng. Vé sẽ cập nhật khi
+                    bạn được xác nhận tham gia.
+                  </p>
+                  <div class="info-line">
+                    <svg class="icon"><use href="#i-refresh" /></svg
+                    ><span>QR tự làm mới khi hết hạn.</span>
+                  </div>
+                  <div class="info-line">
+                    <svg class="icon"><use href="#i-store" /></svg
+                    ><span>Điểm danh độc lập tại từng CLB.</span>
+                  </div>
+                  <div class="info-line">
+                    <svg class="icon"><use href="#i-shield" /></svg
+                    ><span>Chỉ bạn có thể mở vé của mình.</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section data-view="settings" hidden>
+              <div class="settings-grid">
+                <article class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="eyebrow">BAN TỔ CHỨC</span>
+                      <h2>Điều phối sự kiện</h2>
+                    </div>
+                    <button id="edit-event" class="button secondary">
+                      Chỉnh sửa
+                    </button>
+                  </div>
+                  <p id="event-description"></p>
+                  <div class="setting-row">
+                    <div>
+                      <strong>Điểm danh toàn sự kiện</strong>
+                      <p>Đóng sự kiện sẽ tạm dừng mọi gian hàng CLB.</p>
+                    </div>
+                    <button id="toggle-event" class="button secondary"></button>
+                  </div>
+                  <div class="setting-row">
+                    <div>
+                      <strong>Gian hàng câu lạc bộ</strong>
+                      <p>Tạo CLB, sau đó chọn CLB để gán admin.</p>
+                    </div>
+                    <button id="settings-new-club" class="button secondary">
+                      Thêm CLB
+                    </button>
+                  </div>
+                </article>
+                <article class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="eyebrow">QUYỀN THEO GIAN HÀNG</span>
+                      <h2 id="admins-title">Admin CLB</h2>
+                    </div>
+                    <button id="add-admin" class="button secondary">
+                      Thêm admin
+                    </button>
+                  </div>
+                  <p class="hint">
+                    Admin chỉ quản lý danh sách và điểm danh của CLB được gán.
+                  </p>
+                  <div id="admins" class="people-list"></div>
+                </article>
+                <article class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <span class="eyebrow">QUẢN TRỊ TOÀN BỘ</span>
+                      <h2>Superadmin</h2>
+                    </div>
+                    <button id="grant-super" class="button secondary">
+                      Cấp quyền
+                    </button>
+                  </div>
+                  <p class="hint">
+                    Superadmin có thể xem và quản lý tất cả sự kiện, CLB và phân
+                    quyền.
+                  </p>
+                  <div id="superadmins" class="people-list"></div>
+                </article>
+                <article class="panel setup-note">
+                  <svg class="icon"><use href="#i-info" /></svg>
+                  <h2>Bắt đầu với một CLB</h2>
+                  <ol>
+                    <li>Tạo gian hàng CLB trong sự kiện.</li>
+                    <li>Gán admin bằng email Google.</li>
+                    <li>Thêm hoặc nhập danh sách người tham gia.</li>
+                    <li>Mở điểm danh sự kiện và gian hàng.</li>
+                  </ol>
+                </article>
+              </div>
+            </section>
+          </div>
+          <section
+            class="community-strip"
+            aria-label="Đơn vị và cộng đồng đồng hành"
+          >
+            <div>
+              <span class="eyebrow">ĐƠN VỊ &amp; CỘNG ĐỒNG</span
+              ><strong>Cùng nhau tạo nên ngày hội.</strong>
+            </div>
+            <div class="community-logos">
+              <img
+                src="/assets/bo-logo/ban-cat-goc/03-doan-thanh-nien.png"
+                alt="Đoàn Thanh niên"
+                width="48"
+                height="50"
+                loading="lazy"
+              />
+              <img
+                src="/assets/bo-logo/ban-cat-goc/04-hoi-sinh-vien.png"
+                alt="Hội Sinh viên Việt Nam"
+                width="48"
+                height="50"
+                loading="lazy"
+              />
+              <img
+                src="/assets/bo-logo/ban-cat-goc/05-hcmute-chip.png"
+                alt="HCMUTE chip"
+                width="54"
+                height="50"
+                loading="lazy"
+              />
+              <img
+                src="/assets/brand/isc.png"
+                alt="HCMUTE ISC"
+                width="54"
+                height="50"
+                loading="lazy"
+              />
+              <img
+                src="/assets/brand/rtic.png"
+                alt="RTIC"
+                width="48"
+                height="50"
+                loading="lazy"
+              />
+              <img
+                src="/assets/brand/dsc.png"
+                alt="HCMUTE Developer Student Club"
+                width="104"
+                height="50"
+                loading="lazy"
+              />
+            </div>
+          </section>
+          <footer class="app-footer">
+            <span>FIT CLUB DAY <b>2026</b></span
+            ><span>Khám phá công nghệ. Kết nối tương lai.</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <dialog id="event-dialog" aria-labelledby="event-dialog-title">
+      <form id="event-form">
+        <div class="dialog-heading">
+          <h2 id="event-dialog-title">Tạo sự kiện</h2>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Đóng"
+          >
+            <svg class="icon"><use href="#i-close" /></svg>
+          </button>
+        </div>
+        <label>Tên sự kiện<input name="title" required maxlength="200" /></label
+        ><label
+          >Mô tả<textarea
+            name="description"
+            maxlength="20000"
+            rows="3"
+          ></textarea></label
+        ><label
+          >Thời gian bắt đầu · giờ Việt Nam<input
+            name="starts_at"
+            type="datetime-local"
+            required /></label
+        ><label
+          >Ảnh sự kiện · không bắt buộc<input
+            name="image_url"
+            maxlength="2000"
+            placeholder="https://… hoặc /assets/…"
+        /></label>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close>Hủy</button
+          ><button class="button">Lưu sự kiện</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="club-dialog" aria-labelledby="club-dialog-title">
+      <form id="club-form">
+        <div class="dialog-heading">
+          <h2 id="club-dialog-title">Thêm gian hàng CLB</h2>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Đóng"
+          >
+            <svg class="icon"><use href="#i-close" /></svg>
+          </button>
+        </div>
+        <p class="hint">
+          Mỗi CLB có admin, danh sách và kết quả điểm danh riêng.
+        </p>
+        <label
+          >Tên câu lạc bộ<input
+            name="name"
+            required
+            maxlength="120"
+            placeholder="Ví dụ: RTIC" /></label
+        ><label
+          >Giới thiệu gian hàng<textarea
+            name="description"
+            maxlength="5000"
+            rows="3"
+          ></textarea>
+        </label>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close>Hủy</button
+          ><button class="button">Tạo gian hàng</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="person-dialog" aria-labelledby="person-dialog-title">
+      <form id="person-form">
+        <div class="dialog-heading">
+          <h2 id="person-dialog-title"></h2>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Đóng"
+          >
+            <svg class="icon"><use href="#i-close" /></svg>
+          </button>
+        </div>
+        <p class="hint" id="person-context"></p>
+        <label
+          >Họ và tên<input
+            name="name"
+            required
+            maxlength="200"
+            autocomplete="name" /></label
+        ><label
+          >Email Google<input
+            name="email"
+            type="email"
+            required
+            maxlength="254"
+            autocomplete="email"
+            placeholder="MSSV@student.hcmute.edu.vn"
+        /></label>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close>Hủy</button
+          ><button class="button">Thêm tài khoản</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="import-dialog" aria-labelledby="import-dialog-title">
+      <form id="import">
+        <div class="dialog-heading">
+          <h2 id="import-dialog-title">Nhập danh sách Excel</h2>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Đóng"
+          >
+            <svg class="icon"><use href="#i-close" /></svg>
+          </button>
+        </div>
+        <p class="hint" id="import-context"></p>
+        <button id="template" type="button" class="button secondary">
+          <svg class="icon"><use href="#i-download" /></svg>Tải mẫu Excel</button
+        ><label class="upload-zone"
+          ><svg class="icon"><use href="#i-upload" /></svg
+          ><strong>Chọn tệp danh sách .xlsx</strong
+          ><span>Tối đa 5 MB · 10.000 dòng</span
+          ><input name="file" type="file" accept=".xlsx" required
+        /></label>
+        <p class="hint">
+          Giữ nguyên 3 cột: student_id, full_name, email. Đặt MSSV ở định dạng
+          Text để giữ số 0 đầu.
+        </p>
+        <div
+          id="import-result"
+          class="import-result"
+          role="status"
+          hidden
+        ></div>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close>Đóng</button
+          ><button class="button">Nhập danh sách</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+      <form id="confirm-form">
+        <div class="dialog-heading">
+          <h2 id="confirm-title">Xác nhận thay đổi</h2>
+          <button
+            type="button"
+            class="icon-button"
+            data-close
+            aria-label="Đóng"
+          >
+            <svg class="icon"><use href="#i-close" /></svg>
+          </button>
+        </div>
+        <p id="confirm-message"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button type="button" class="button secondary" data-close>Hủy</button
+          ><button class="button danger-button">Thu hồi quyền</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="notice" class="toast" role="status" hidden>
+      <span id="notice-message"></span
+      ><button
+        class="icon-button"
+        id="notice-close"
+        aria-label="Đóng thông báo"
+      >
+        <svg class="icon"><use href="#i-close" /></svg>
+      </button>
+    </div>
+  </body>
+</html>
