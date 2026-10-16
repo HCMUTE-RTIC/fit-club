@@ -1,0 +1,28 @@
+[Unit]
+Description=FIT Club Day - event.hcmutertic.com
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fit-event
+Group=fit-event
+WorkingDirectory=/srv/fit-club-event/current/backend
+EnvironmentFile=/etc/fit-club-event/.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/srv/fit-club-event/current/.venv/bin/uvicorn app.main:app --host 192.168.1.17 --port 8512 --proxy-headers --forwarded-allow-ips=192.168.1.80
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+StateDirectory=fit-club-event
+StateDirectoryMode=0750
+ReadWritePaths=/var/lib/fit-club-event
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

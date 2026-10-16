@@ -3,6 +3,7 @@ name: CI/CD Pipeline - FIT CLUB
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,6 +28,7 @@ jobs:
           PYTHONPATH=. .venv/bin/pytest -q --ignore=tests/test_browser.py
 
       - name: Deploy to Production
+        if: github.event_name == 'workflow_dispatch'
         run: |
           DEPLOY_DIR="/home/phuc/FIT-CLUB"
           echo "Deploying latest changes to $DEPLOY_DIR..."

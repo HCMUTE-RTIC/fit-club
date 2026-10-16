@@ -95,11 +95,11 @@ def test_superadmin_bulk_template_duplicates_search_export(api, monkeypatch):
     assert repeated['imported'] == 0 and len(repeated['duplicates']) == 3
 
 
-@pytest.mark.parametrize('endpoint', ['/superadmins', '/events/1/admins', '/events/1/students'])
-def test_reject_non_student_accounts(api, monkeypatch, endpoint):
+@pytest.mark.parametrize('endpoint,expected', [('/superadmins', 201), ('/events/1/admins', 201), ('/events/1/students', 422)])
+def test_external_email_is_allowed_for_staff_but_not_student_rosters(api, monkeypatch, endpoint, expected):
     root = auth(api, monkeypatch)
     event(api, root)
-    assert api.post(endpoint, headers=root, json={'email': 'person@gmail.com', 'name': 'Wrong'}).status_code == 422
+    assert api.post(endpoint, headers=root, json={'email': 'person@gmail.com', 'name': 'Staff'}).status_code == expected
 
 
 def test_blank_person_name_rejected(api, monkeypatch):

@@ -1015,18 +1015,39 @@ function openEvent(edit) {
 }
 function openPerson(action) {
   personAction = action;
+  openDialog("person-dialog");
   $("person-dialog-title").textContent = {
     student: "Thêm người tham gia",
     admin: "Thêm admin CLB",
     superadmin: "Cấp quyền superadmin",
+    access: "Cấp quyền theo email",
   }[action];
   $("person-context").textContent =
-    action === "superadmin"
-      ? "Quyền này cho phép quản lý toàn bộ sự kiện và tất cả CLB."
-      : "Thêm vào gian hàng " +
-        state.club.name +
-        ". Có thể thêm trước lần đăng nhập đầu tiên.";
-  openDialog("person-dialog");
+    action === "access"
+      ? "Nhập email Google rồi chọn vai trò. Admin chỉ có quyền tại CLB được gán."
+      : action === "superadmin"
+        ? "Quyền này cho phép quản lý toàn bộ sự kiện và tất cả CLB."
+        : "Thêm vào gian hàng " +
+          state.club.name +
+          ". Có thể thêm trước lần đăng nhập đầu tiên.";
+  const form = $("person-form"),
+    unified = action === "access";
+  form.elements.name.required = action === "student";
+  $("person-name-help").hidden = action === "student";
+  $("grant-role-field").hidden = !unified;
+  form.elements.role.disabled = !unified;
+  form.elements.club_id.replaceChildren(
+    new Option("Chọn CLB trong sự kiện hiện tại…", ""),
+    ...state.clubs.map((club) => new Option(club.name, club.id)),
+  );
+  if (state.club) form.elements.club_id.value = state.club.id;
+  updateGrantScope();
+}
+function updateGrantScope() {
+  const form = $("person-form"),
+    scoped = personAction === "access" && form.elements.role.value === "admin";
+  $("grant-club-field").hidden = !scoped;
+  form.elements.club_id.disabled = !scoped;
 }
 all("[data-nav]").forEach(
   (button) => (button.onclick = guarded(() => showView(button.dataset.nav))),
@@ -1093,6 +1114,8 @@ $("empty-action").onclick = () =>
 $("add-student").onclick = () => openPerson("student");
 $("add-admin").onclick = () => openPerson("admin");
 $("grant-super").onclick = () => openPerson("superadmin");
+$("grant-access").onclick = () => openPerson("access");
+$("person-form").elements.role.onchange = updateGrantScope;
 $("open-import").onclick = () => {
   $("import-context").textContent =
     "Danh sách chỉ được thêm vào " + state.club.name + ".";
@@ -1159,14 +1182,27 @@ bindForm("club-form", async (data) => {
   notice("Đã tạo gian hàng. Bạn có thể thêm admin cho CLB.");
 });
 bindForm("person-form", async (data) => {
-  const path =
-    personAction === "superadmin"
-      ? "/superadmins"
-      : clubPath() + (personAction === "admin" ? "/admins" : "/students");
-  await api(path, {
-    method: "POST",
-    json: { name: data.get("name").trim(), email: data.get("email").trim() },
-  });
+  const payload = {
+    name: data.get("name").trim(),
+    email: data.get("email").trim(),
+  };
+  if (personAction === "student")
+    await api(clubPath() + "/students", { method: "POST", json: payload });
+  else {
+    payload.role = personAction === "access" ? data.get("role") : personAction;
+    if (payload.role === "admin") {
+      if (!state.event)
+        throw Error("Tạo hoặc chọn sự kiện trước khi gán admin CLB.");
+      payload.event_id = state.event.id;
+      payload.club_id =
+        personAction === "access"
+          ? Number(data.get("club_id"))
+          : state.club?.id;
+      if (!payload.club_id)
+        throw Error("Chọn CLB được quản lý trước khi cấp quyền.");
+    }
+    await api("/access/grants", { method: "POST", json: payload });
+  }
   $("person-dialog").close();
   await showView(state.view);
   notice("Đã thêm tài khoản.");
@@ -1275,7 +1311,7 @@ setInterval(async () => {
   try {
     const config = await api("/auth/config");
     $("policy").textContent = config.student_email_only
-      ? "Dùng tài khoản Google @student.hcmute.edu.vn của bạn."
+      ? "Sinh viên dùng @student.hcmute.edu.vn. Admin có thể dùng email Google đã được cấp quyền."
       : "Dùng tài khoản Google có email đã xác minh.";
     // Restore a session even when Google Sign-In is temporarily unavailable.
     if (state.token) await bootUser();

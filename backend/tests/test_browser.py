@@ -178,3 +178,19 @@ def test_student_club_branding_changes_with_selected_ticket(api, monkeypatch, br
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     finally:
         page.close()
+
+
+def test_superadmin_grants_gmail_access_by_email_without_event(api, monkeypatch, browser):
+    root = auth(api, monkeypatch)
+    page = signed_page(browser, root)
+    try:
+        page.locator('#grant-access').click()
+        dialog = page.locator('#person-dialog')
+        dialog.get_by_label('Email Google').fill('staff@gmail.com')
+        dialog.get_by_label('Vai trò').select_option('superadmin')
+        dialog.get_by_role('button', name='Thêm tài khoản', exact=True).click()
+        pw.expect(dialog).not_to_be_visible()
+        users = api.get('/superadmins', headers=root).json()['users']
+        assert any(user['email'] == 'staff@gmail.com' for user in users)
+    finally:
+        page.close()

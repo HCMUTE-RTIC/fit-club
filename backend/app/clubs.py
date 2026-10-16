@@ -130,7 +130,7 @@ def set_checkin(event_id: int, club_id: int, body: CheckinState, user=Depends(co
 @router.post('/events/{event_id}/clubs/{club_id}/admins', status_code=201)
 def add_admin(event_id: int, club_id: int, body: core.Person, user=Depends(core.superuser), session: Session = Depends(core.db)):
     get_club(session, event_id, club_id)
-    person = core.ensure_user(session, body.email, body.name)
+    person = core.ensure_user(session, body.email, body.name, allow_external=True)
     if session.get(ClubAdmin, (club_id, person.id)):
         raise HTTPException(409, 'Admin đã được gán cho CLB')
     session.add(ClubAdmin(club_id=club_id, user_id=person.id))

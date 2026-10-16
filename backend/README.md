@@ -2,9 +2,9 @@
 
 ## Production Backend URL
 
-- **API Base URL:** `https://fit.caohoangphuc.id.vn`
-- **Swagger UI:** https://fit.caohoangphuc.id.vn/docs
-- **ReDoc:** https://fit.caohoangphuc.id.vn/redoc
+- **API Base URL:** `https://event.hcmutertic.com`
+- **Swagger UI:** https://event.hcmutertic.com/docs
+- **ReDoc:** https://event.hcmutertic.com/redoc
 
 ## Chạy local
 
@@ -19,14 +19,14 @@ cp .env.example .env
 
 Swagger local: http://localhost:8000/docs. Dashboard tại http://localhost:8000/; landing page giới thiệu tại `/landingpage`.
 
-Google Cloud: tạo OAuth client loại Web application; thêm Authorized JavaScript origins của frontend. Frontend dùng Google Identity Services lấy `credential` (ID token), gửi POST `/auth/google` với JSON `{"credential":"..."}`. Backend xác minh chữ ký, audience, issuer, hạn token bằng google-auth; yêu cầu `email_verified=true`, `hd=student.hcmute.edu.vn`, email khớp MSSV số 6–15 ký tự. Không có mật khẩu hay API đăng nhập giả trong ứng dụng. Họ tên lấy từ Google, MSSV lấy phần trước @. Thư viện xác minh cần truy cập chứng thư Google qua internet.
+Google Cloud: tạo OAuth client loại Web application; thêm Authorized JavaScript origins của frontend. Frontend dùng Google Identity Services lấy `credential` (ID token), gửi POST `/auth/google` với JSON `{"credential":"..."}`. Backend xác minh chữ ký, audience, issuer, hạn token và `email_verified=true`. Sinh viên dùng email MSSV số 6–15 ký tự và `hd=student.hcmute.edu.vn`; email ngoài trường chỉ được đăng nhập trong chế độ nghiêm ngặt khi đã được cấp quyền admin/superadmin hoặc có trong bootstrap. Không có mật khẩu hay API đăng nhập giả. Họ tên lấy từ Google; email ngoài trường có mã tài khoản ổn định, không phải MSSV. Thư viện xác minh cần truy cập chứng thư Google qua internet.
 
 Token trả về dùng `Authorization: Bearer <access_token>`. Hết phiên sau 60 phút; đăng nhập Google lại. Không lưu token vào URL. Khi triển khai dùng HTTPS và cấu hình CORS đúng origin.
 
 ## Vai trò
 
-- Superadmin: email nằm trong `SUPERADMIN_EMAILS` (ngăn cách dấu phẩy); cũng phải đăng nhập Google bằng email sinh viên. Cấu hình này không tự tạo người dùng, không bỏ qua xác thực.
-- Admin: được superadmin gán theo sự kiện. Admin có thể là sinh viên ở sự kiện khác. Kiểm tra quyền đọc từ DB trong từng request.
+- Superadmin: email bootstrap nằm trong `SUPERADMIN_EMAILS` hoặc được superadmin khác cấp quyền. Có thể dùng Gmail đã xác minh; cấu hình không bỏ qua xác thực Google.
+- Admin: được superadmin gán theo CLB; có thể dùng email Google ngoài trường đã được cấp quyền. Quyền được đọc từ DB trong từng request.
 - Sinh viên: chỉ thấy sự kiện đã được thêm vào; nhận QR của chính mình khi mở điểm danh.
 
 ## API chính
@@ -86,13 +86,13 @@ Tài liệu đối chiếu: https://developers.google.com/identity/gsi/web/guide
 
 ## Thêm superadmin
 
-Superadmin khởi tạo: `24110303@student.hcmute.edu.vn` (đã cấu hình trong `.env`).
+Superadmin khởi tạo của môi trường `event.hcmutertic.com`: `hovietanh147@gmail.com`, cấu hình trong `.env` riêng trên server.
 
 - `POST /superadmins`: JSON `{ "email": "24110001@student.hcmute.edu.vn", "name": "Họ tên" }` để cấp quyền; có thể cấp trước lần đăng nhập đầu tiên.
 - `GET /superadmins`: danh sách tài khoản và email khởi tạo.
 - `DELETE /superadmins/{user_id}`: thu hồi quyền được cấp qua DB; hiệu lực ngay cả với access token còn hạn. Không xóa quyền bootstrap qua API, quản lý danh sách bootstrap bằng `.env` để tránh khóa quản trị.
 
-Chỉ superadmin được gọi các endpoint này. Tất cả superadmin vẫn phải dùng Google sinh viên đã xác minh.
+Chỉ superadmin được gọi các endpoint này. Tất cả tài khoản vẫn phải đăng nhập qua Google có email đã xác minh. API `POST /access/grants` hỗ trợ cấp quyền chỉ bằng email và vai trò; admin cần thêm `event_id` và `club_id`. Xem [runbook môi trường mới](../docs/DEPLOYMENT.md).
 
 ## FIT Club Day: nhiều gian hàng CLB
 

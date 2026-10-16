@@ -270,7 +270,15 @@
               <button id="reload" class="button secondary">
                 <svg class="icon"><use href="#i-refresh" /></svg
                 ><span>Làm mới</span></button
-              ><button id="new-event" data-super class="button" hidden>
+              ><button
+                id="grant-access"
+                data-super
+                class="button secondary"
+                hidden
+              >
+                <svg class="icon"><use href="#i-shield" /></svg>Cấp quyền
+              </button>
+              <button id="new-event" data-super class="button" hidden>
                 <svg class="icon"><use href="#i-plus" /></svg>Tạo sự kiện
               </button>
             </div>
@@ -945,6 +953,16 @@
           </button>
         </div>
         <p class="hint" id="person-context"></p>
+        <label id="grant-role-field" hidden
+          >Vai trò<select name="role" disabled required>
+            <option value="">Chọn vai trò…</option>
+            <option value="admin">Admin CLB</option>
+            <option value="superadmin">Superadmin toàn hệ thống</option>
+          </select></label
+        >
+        <label id="grant-club-field" hidden
+          >CLB được quản lý<select name="club_id" disabled required></select
+        ></label>
         <label
           >Họ và tên<input
             name="name"
@@ -960,6 +978,10 @@
             autocomplete="email"
             placeholder="MSSV@student.hcmute.edu.vn"
         /></label>
+        <p id="person-name-help" class="hint" hidden>
+          Có thể để trống họ tên khi cấp quyền; tên sẽ cập nhật từ Google khi
+          tài khoản đăng nhập.
+        </p>
         <p class="form-error" role="alert" hidden></p>
         <div class="dialog-actions">
           <button type="button" class="button secondary" data-close>Hủy</button

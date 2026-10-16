@@ -5,6 +5,7 @@ import re
 import hashlib
 import secrets
 import zipfile
+from typing import Literal
 
 import jwt
 import qrcode
@@ -124,14 +125,14 @@ def db():
         yield session
 
 
-def student_email(value):
+def student_email(value, *, allow_external=False):
     if not isinstance(value, str):
         raise HTTPException(422, 'Email không hợp lệ')
     value = value.strip().lower()
     match = EMAIL_RE.fullmatch(value)
     if match:
         return value, match.group(1)
-    if settings.student_email_only:
+    if settings.student_email_only and not allow_external:
         raise HTTPException(422, 'Email phải có dạng <MSSV số>@student.hcmute.edu.vn')
     if len(value) > 254 or not re.fullmatch(r"[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+", value):
         raise HTTPException(422, 'Email không hợp lệ')
@@ -225,15 +226,28 @@ def verify_google(credential):
 @app.post('/auth/google')
 def login(body: GoogleLogin, session: Session = Depends(db)):
     claims = verify_google(body.credential)
-    if claims.get('email_verified') is not True or (settings.student_email_only and claims.get('hd') != DOMAIN) or not claims.get('sub'):
-        raise HTTPException(403, 'Chỉ tài khoản Google sinh viên HCMUTE đã xác minh được phép')
-    email, sid = student_email(claims.get('email', ''))
+    if claims.get('email_verified') is not True or not claims.get('sub'):
+        raise HTTPException(403, 'Cần tài khoản Google có email đã xác minh')
+    email, sid = student_email(claims.get('email', ''), allow_external=True)
     user = session.scalar(select(User).where(User.google_sub == claims['sub']))
     if user and user.email != email:
         raise HTTPException(403, 'Danh tính Google đã đổi email; cần liên hệ quản trị')
     user = user or session.scalar(select(User).where(User.email == email))
     if user and user.google_sub and user.google_sub != claims['sub']:
         raise HTTPException(403, 'Email đã gắn với danh tính Google khác')
+    if settings.student_email_only:
+        if EMAIL_RE.fullmatch(email):
+            if claims.get('hd') != DOMAIN:
+                raise HTTPException(403, 'Cần tài khoản Google sinh viên HCMUTE đã xác minh')
+        else:
+            bootstrap = email in {x.strip().lower() for x in settings.superadmin_emails.split(',') if x.strip()}
+            assigned = user is not None and (
+                is_super(user)
+                or session.scalar(select(EventAdmin.user_id).where(EventAdmin.user_id == user.id).limit(1)) is not None
+                or session.scalar(select(ClubAdmin.user_id).where(ClubAdmin.user_id == user.id).limit(1)) is not None
+            )
+            if not bootstrap and not assigned:
+                raise HTTPException(403, 'Email ngoài trường cần được superadmin cấp quyền trước')
     name = str(claims.get('name') or '').strip()[:200]
     if not name:
         raise HTTPException(422, 'Google không cung cấp họ tên')
@@ -324,8 +338,8 @@ class Person(BaseModel):
         return value.strip()
 
 
-def ensure_user(session, email, name):
-    email, sid = student_email(email)
+def ensure_user(session, email, name, *, allow_external=False):
+    email, sid = student_email(email, allow_external=allow_external)
     user = session.scalar(select(User).where(User.email == email))
     if not user:
         user = User(email=email, student_id=sid, name=name.strip())
@@ -337,7 +351,7 @@ def ensure_user(session, email, name):
 @app.post('/events/{event_id}/admins', status_code=201)
 def add_admin(event_id: int, body: Person, user: User = Depends(superuser), session: Session = Depends(db)):
     get_event(session, event_id)
-    person = ensure_user(session, body.email, body.name)
+    person = ensure_user(session, body.email, body.name, allow_external=True)
     if session.get(EventAdmin, (event_id, person.id)):
         raise HTTPException(409, 'Admin đã được gán')
     session.add(EventAdmin(event_id=event_id, user_id=person.id))
@@ -550,7 +564,7 @@ def health():
 
 @app.post('/superadmins', status_code=201)
 def add_superadmin(body: Person, user: User = Depends(superuser), session: Session = Depends(db)):
-    person = ensure_user(session, body.email, body.name)
+    person = ensure_user(session, body.email, body.name, allow_external=True)
     if is_super(person):
         raise HTTPException(409, 'Tài khoản đã là superadmin')
     session.add(SuperAdmin(user_id=person.id))
@@ -575,6 +589,43 @@ def revoke_superadmin(user_id: int, user: User = Depends(superuser), session: Se
         raise HTTPException(404, 'Không tìm thấy superadmin')
     session.delete(role)
     session.commit()
+
+
+class AccessGrant(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+    name: str = Field(default='', max_length=200)
+    role: Literal['superadmin', 'admin']
+    event_id: int | None = Field(default=None, gt=0)
+    club_id: int | None = Field(default=None, gt=0)
+
+
+@app.post('/access/grants', status_code=201, tags=['Phân quyền'])
+def grant_access(body: AccessGrant, user: User = Depends(superuser), session: Session = Depends(db)):
+    if body.role == 'admin':
+        if body.event_id is None or body.club_id is None:
+            raise HTTPException(422, 'Chọn sự kiện và CLB cho admin')
+        item = session.get(Club, body.club_id)
+        if not item or item.event_id != body.event_id:
+            raise HTTPException(404, 'Không tìm thấy CLB trong sự kiện đã chọn')
+    elif body.event_id is not None or body.club_id is not None:
+        raise HTTPException(422, 'Superadmin là quyền toàn hệ thống, không giới hạn theo CLB')
+    email, _ = student_email(body.email, allow_external=True)
+    name = body.name.strip() or email.split('@', 1)[0]
+    person = ensure_user(session, email, name, allow_external=True)
+    if body.role == 'superadmin':
+        if is_super(person):
+            raise HTTPException(409, 'Tài khoản đã là superadmin')
+        session.add(SuperAdmin(user_id=person.id))
+    else:
+        if session.get(ClubAdmin, (body.club_id, person.id)):
+            raise HTTPException(409, 'Admin đã được gán cho CLB')
+        session.add(ClubAdmin(club_id=body.club_id, user_id=person.id))
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(409, 'Quyền đã thay đổi đồng thời; hãy tải lại danh sách')
+    return {**profile(person), 'role': body.role, 'event_id': body.event_id, 'club_id': body.club_id}
 
 
 from .clubs import Club, ClubAdmin, router as club_router
