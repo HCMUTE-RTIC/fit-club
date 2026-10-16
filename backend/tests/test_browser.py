@@ -184,7 +184,9 @@ def test_superadmin_can_create_club_and_assign_club_admin(api, monkeypatch, brow
 
 
 def test_student_club_branding_changes_with_selected_ticket(api, monkeypatch, browser):
-    _, _, _, student, _, first, second = setup_clubs(api, monkeypatch)
+    root, _, _, student, eid, first, second = setup_clubs(api, monkeypatch)
+    sbg = club(api, root, eid, 'SBG')
+    api.post(f'/events/{eid}/clubs/{sbg}/join', headers=student).raise_for_status()
     page = signed_page(browser, student, 375)
     try:
         page.get_by_role('button', name='Vé của tôi', exact=True).click()
@@ -196,6 +198,12 @@ def test_student_club_branding_changes_with_selected_ticket(api, monkeypatch, br
         pw.expect(logo).to_have_attribute('alt', 'Logo RTIC')
         page.wait_for_function("document.querySelector('#ticket-club-brand img')?.naturalWidth > 0")
         pw.expect(page.locator('#ticket-club-name')).to_have_text('RTIC')
+        page.locator('#clubs').select_option(str(sbg))
+        pw.expect(logo).to_have_attribute('alt', 'Logo SBG')
+        page.wait_for_function("document.querySelector('#ticket-club-brand img')?.naturalWidth > 0")
+        page.locator('#clubs').select_option(str(second))
+        pw.expect(logo).to_have_attribute('alt', 'Logo DSC')
+        page.wait_for_function("document.querySelector('#ticket-club-brand img')?.naturalWidth > 0")
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     finally:
         page.close()

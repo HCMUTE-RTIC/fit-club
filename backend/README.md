@@ -152,4 +152,4 @@ QR ảnh dùng bản jsQR 1.4.0 phục vụ từ `frontend/vendor`; license Apac
 
 ### Nhận diện logo
 
-Dashboard và vé dùng logo gốc trong `assets/brand/`; nguồn file ghi ở `SOURCES.md`. RTIC, DSC và ISC/ATTT được nhận diện từ tên CLB; CLB khác hiển thị chữ viết tắt cho đến khi bổ sung file nhận diện. Logo sự kiện và các đơn vị còn lại lấy từ `assets/bo-logo/ban-cat-goc/`. Các ảnh phục dựng không được dùng trong dashboard/vé. Logo được phục vụ qua static mount `/assets`, không thay đổi schema DB.
+Landing, đăng nhập, dashboard và vé dùng chung logo gốc trong `assets/brand/`; nguồn file ghi ở `SOURCES.md`. RTIC, DSC, SBG và ISC/ATTT được nhận diện từ tên CLB; CLB khác hiển thị chữ viết tắt cho đến khi bổ sung file nhận diện. Vé có hàng logo của bốn CLB tổ chức. Logo sự kiện và các đơn vị còn lại lấy từ `assets/bo-logo/ban-cat-goc/`. Logo được phục vụ qua static mount `/assets`, không thay đổi schema DB.

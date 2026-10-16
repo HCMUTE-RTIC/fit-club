@@ -110,6 +110,9 @@ function clubMark(name) {
   } else if (/\bdsc\b|developer student club/.test(key)) {
     filename = "/assets/brand/dsc.png";
     label = "DSC";
+  } else if (/\bsbg\b/.test(key)) {
+    filename = "/assets/brand/sbg.jpg";
+    label = "SBG";
   } else if (/\bisc\b|\battt\b|an toan thong tin/.test(key)) {
     filename = "/assets/brand/isc.png";
     label = name;
