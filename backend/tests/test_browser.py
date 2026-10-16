@@ -105,6 +105,12 @@ def test_manager_search_and_navigation(api, monkeypatch, browser, tmp_path):
     try:
         pw.expect(page.locator('#workspace')).to_be_visible()
         page.get_by_role('button', name='Người tham gia', exact=True).click()
+        pw.expect(page.locator('#students tr')).to_have_count(25)
+        page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+        page.get_by_role('button', name='Tổng quan', exact=True).click()
+        pw.expect(page.locator('#stat-registered')).to_have_text('52')
+        assert page.evaluate('window.scrollY') == 0, 'Navigation should open the new view from its beginning'
+        page.get_by_role('button', name='Người tham gia', exact=True).click()
         page.get_by_role('searchbox', name='Tìm người tham gia').fill('10000003')
         page.get_by_role('button', name='Tìm kiếm', exact=True).click()
         pw.expect(page.locator('#students tr')).to_have_count(1)
@@ -203,7 +209,7 @@ def test_superadmin_grants_gmail_access_by_email_without_event(api, monkeypatch,
         page.close()
 
 
-@pytest.mark.parametrize('width', [360, 390, 768])
+@pytest.mark.parametrize('width', [360, 390, 768, 1024, 1440])
 def test_new_student_discovers_and_joins_club_on_mobile(api, monkeypatch, browser, width, tmp_path):
     root = auth(api, monkeypatch)
     eid = event(api, root, 'FIT Club Day')
@@ -216,12 +222,19 @@ def test_new_student_discovers_and_joins_club_on_mobile(api, monkeypatch, browse
         pw.expect(page.locator('#event-title')).to_have_text('FIT Club Day')
         pw.expect(page.locator('#event-title')).to_be_visible()
         pw.expect(page.locator('.student-club-card')).to_have_count(5)
+        if width < 768:
+            first_join = page.get_by_role('button', name='Tham gia DSC', exact=True)
+            first_bounds = first_join.bounding_box()
+            nav_bounds = page.get_by_role('navigation', name='Điều hướng chính').bounding_box()
+            assert first_bounds['y'] + first_bounds['height'] <= nav_bounds['y'], 'The first join action must be reachable before scrolling'
         join = page.get_by_role('button', name='Tham gia RTIC', exact=True)
         pw.expect(join).to_be_visible()
         assert join.bounding_box()['height'] >= 44
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         if width == 390:
             screenshot(page, tmp_path, 'student-overview-mobile.png')
+        elif width == 1440:
+            screenshot(page, tmp_path, 'student-overview-desktop.png')
         join.click()
         pw.expect(page.locator('#ticket-status')).to_contain_text('Đã tham gia')
         assert api.get(f'/events/{eid}/clubs/{cid}/students', headers=root).json()['total'] == 1
@@ -257,10 +270,11 @@ def test_student_page_updates_when_organizer_opens_event(api, monkeypatch, brows
         page.close()
 
 
-def test_manager_can_add_participant_and_open_scanner_on_phone(api, monkeypatch, browser):
+def test_manager_can_add_participant_and_open_scanner_on_phone(api, monkeypatch, browser, tmp_path):
     _, admin, _, _, eid, cid, _ = setup_clubs(api, monkeypatch)
     page = signed_page(browser, admin, 375)
     try:
+        screenshot(page, tmp_path, 'manager-mobile.png')
         page.get_by_role('button', name='Người tham gia', exact=True).click()
         page.get_by_role('button', name='Thêm người', exact=True).click()
         form = page.locator('#person-dialog')
@@ -269,7 +283,9 @@ def test_manager_can_add_participant_and_open_scanner_on_phone(api, monkeypatch,
         form.get_by_role('button', name='Thêm tài khoản', exact=True).click()
         pw.expect(form).not_to_be_visible()
         pw.expect(page.locator('#students tr')).to_have_count(2)
+        assert page.locator('#students .person-cell').first.bounding_box()['width'] >= 220, 'Names and emails must remain readable on a phone'
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        screenshot(page, tmp_path, 'participants-mobile.png')
         page.get_by_role('button', name='Quét điểm danh', exact=True).click()
         pw.expect(page.get_by_role('button', name='Bật camera', exact=True)).to_be_visible()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')

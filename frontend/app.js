@@ -24,26 +24,26 @@ const views = {
   overview: [
     "Tổng quan",
     "Tổng quan sự kiện",
-    "Mỗi kết nối là một khởi đầu mới.",
+    "Đăng ký và theo dõi điểm danh tại các câu lạc bộ.",
   ],
   participants: [
     "Người tham gia",
-    "Những gương mặt đồng hành",
+    "Người tham gia",
     "Quản lý danh sách và kết quả tại gian hàng của bạn.",
   ],
   checkin: [
     "Quét điểm danh",
-    "Chào đón những kết nối mới",
-    "Một lần quét, thêm một dấu ấn tại gian hàng.",
+    "Quét điểm danh",
+    "Quét mã QR để xác nhận sinh viên tại gian hàng.",
   ],
   ticket: [
     "Vé của tôi",
-    "Hành trình của bạn",
-    "Sẵn sàng khám phá và kết nối cùng các câu lạc bộ.",
+    "Vé của tôi",
+    "Chọn CLB và mở mã QR khi đến gian hàng.",
   ],
   settings: [
     "Quản trị",
-    "Cùng tạo nên ngày hội",
+    "Quản trị sự kiện",
     "Điều phối sự kiện, gian hàng và đội ngũ quản trị.",
   ],
 };
@@ -297,6 +297,7 @@ async function bootUser(preferred = {}) {
   const identity = await api("/auth/me");
   if (token !== state.token || epoch !== state.epoch) return;
   state.me = identity;
+  $("workspace").dataset.role = identity.role;
   $("my-name").textContent = state.me.name;
   $("account-email").textContent = state.me.email;
   $("my-avatar").textContent = initials(state.me.name);
@@ -350,6 +351,7 @@ async function loadEvents(preferred = {}) {
     const events = await workspaceEvents();
     if (epoch !== state.epoch) return;
     state.events = events;
+    $("workspace").dataset.singleEvent = String(events.length <= 1);
     state.event =
       events.find((item) => item.id === eventId) || events[0] || null;
     $("events").replaceChildren(
@@ -410,21 +412,18 @@ async function loadEvents(preferred = {}) {
 }
 function renderContext() {
   if (!state.event) return;
-  const open =
-    state.event.checkin_open && (!state.club || state.club.checkin_open);
-  $("event-title").textContent = state.event.title;
-  updateClubMark("hero-club-brand", state.club?.name);
+  const heroClub = manager() || superUser() ? state.club : null;
+  const open = state.event.checkin_open && (!heroClub || heroClub.checkin_open);
+  $("event-title").textContent = heroClub?.name || state.event.title;
+  updateClubMark("hero-club-brand", heroClub?.name);
   updateClubMark("ticket-club-brand", state.club?.name);
-  $("hero-brand-label").textContent = state.club
-    ? "GIAN HÀNG ĐỒNG HÀNH"
-    : "FIT CLUB DAY 2026";
-  $("hero-subtitle").textContent = state.club
-    ? state.club.name +
-      " · " +
-      (state.club.description || "Gian hàng kết nối cộng đồng công nghệ")
-    : "Không gian chung của các câu lạc bộ học thuật HCMUTE";
+  $("hero-subtitle").textContent = heroClub
+    ? state.event.title +
+      (heroClub.description ? " · " + heroClub.description : "")
+    : state.event.description ||
+      "Ngày hội câu lạc bộ · Khoa Công nghệ Thông tin, HCMUTE";
   $("event-time").textContent = dateTime(state.event.starts_at);
-  $("event-status").textContent = !state.club
+  $("event-status").textContent = !heroClub
     ? state.event.checkin_open
       ? "Sự kiện đang mở"
       : "Sự kiện đang đóng"
@@ -482,6 +481,7 @@ async function showView(view) {
   }
   const previous = state.view;
   state.view = view;
+  $("workspace").dataset.currentView = view;
   $("account-menu").open = false;
   if (view !== "checkin") stopCamera();
   if (view !== "ticket") clearQr();
@@ -495,8 +495,14 @@ async function showView(view) {
     else button.removeAttribute("aria-current");
   });
   $("breadcrumb").textContent = views[view][0];
-  $("page-title").textContent = views[view][1];
-  $("page-description").textContent = views[view][2];
+  $("page-title").textContent =
+    view === "overview" && (manager() || superUser()) && state.club
+      ? "Tổng quan CLB"
+      : views[view][1];
+  $("page-description").textContent =
+    view === "overview" && (manager() || superUser())
+      ? "Theo dõi đăng ký và kết quả điểm danh tại sự kiện."
+      : views[view][2];
   if (!state.event) return;
   if (view === "participants") await loadStudents();
   else if (view === "settings") await loadSettings();
@@ -504,7 +510,10 @@ async function showView(view) {
     await loadSummary();
   else if (state.club && ["overview", "ticket"].includes(view))
     await loadMyStatus();
-  if (previous !== view) $("main-content").focus({ preventScroll: true });
+  if (previous !== view) {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    $("main-content").focus({ preventScroll: true });
+  }
 }
 function filterQuery() {
   const data = new FormData($("filter")),
@@ -537,6 +546,7 @@ async function loadStudents() {
         who = node("td"),
         status = node("td"),
         checked = node("td");
+      row.dataset.attended = String(person.attended);
       who.append(personCell(person));
       status.append(
         node(
@@ -599,8 +609,8 @@ async function loadSummary() {
   const recent = $("recent-list");
   recent.replaceChildren();
   $("activity-title").textContent = state.club
-    ? "Vừa ghé gian hàng"
-    : "Nhịp kết nối các CLB";
+    ? "Điểm danh gần đây"
+    : "Trạng thái các CLB";
   if (data.club_summaries)
     data.club_summaries.slice(0, 6).forEach((club) => {
       const row = node("div", "recent-row"),
@@ -656,8 +666,8 @@ async function loadSummary() {
         "span",
         "",
         state.club
-          ? "Những lượt ghé đầu tiên sẽ xuất hiện ở đây."
-          : "Thêm gian hàng CLB để bắt đầu ngày hội.",
+          ? "Chưa có lượt điểm danh. Kết quả sẽ xuất hiện sau khi quét QR."
+          : "Chưa có CLB. Thêm gian hàng để bắt đầu.",
       ),
     );
     recent.append(empty);
@@ -715,7 +725,7 @@ async function loadMyStatus() {
   } else if (data.attended) {
     message = "Bạn đã điểm danh · " + dateTime(data.checked_at);
     kind = "success";
-    clearQr("Đã xác nhận tham gia. Hẹn gặp tại những kết nối tiếp theo!");
+    clearQr("Đã xác nhận điểm danh tại gian hàng này.");
   } else if (!open) {
     message =
       "Đã tham gia " +
@@ -732,14 +742,14 @@ async function loadMyStatus() {
     data.registered || !state.event.checkin_open || !canJoin();
   $("qr").hidden = !data.registered || data.attended || !open;
   $("student-status-title").textContent = data.attended
-    ? "Bạn đã để lại dấu ấn!"
-    : "Sẵn sàng khám phá?";
+    ? "Đã xác nhận điểm danh"
+    : "Vé tham gia của bạn";
   $("student-status-text").textContent = data.attended
     ? "Đã xác nhận tại " +
       state.club.name +
       " lúc " +
       dateTime(data.checked_at) +
-      ". Chọn CLB khác để tiếp tục hành trình."
+      ". Bạn có thể mở vé của CLB khác để tiếp tục điểm danh."
     : message;
 }
 function canJoin() {
@@ -766,35 +776,45 @@ function renderStudentCatalog() {
     return;
   }
   if (!state.club) {
-    $("student-status-title").textContent = "Ngày hội đang chờ bạn";
+    $("student-status-title").textContent = registered.length
+      ? "Bạn đã tham gia " + registered.length + " CLB"
+      : "Chưa đăng ký CLB";
     $("student-status-text").textContent = registered.length
-      ? "Bạn đã tham gia " +
-        registered.length +
-        " CLB. Mở vé để xem trạng thái và mã QR của từng gian hàng."
-      : "Chọn một gian hàng trong danh sách và bấm Tham gia CLB để nhận vé của mình.";
+      ? "Mở vé để xem trạng thái và mã QR của từng gian hàng."
+      : "Bấm Tham gia tại CLB bạn quan tâm để nhận vé.";
   }
   $("student-clubs").replaceChildren(
     ...state.clubs.map((club) => {
       const card = node("article", "student-club-card"),
         heading = node("div", "student-club-heading"),
         copy = node("div");
+      const title = node("div", "student-club-title");
+      title.append(node("h3", "", club.name));
+      if (club.registered)
+        title.append(
+          node(
+            "span",
+            "badge " + (club.attended ? "" : "neutral"),
+            club.attended ? "Đã điểm danh" : "Đã tham gia",
+          ),
+        );
+      copy.append(title);
+      if (club.description)
+        copy.append(node("p", "student-club-description", club.description));
       copy.append(
-        node("h3", "", club.name),
         node(
           "span",
-          "badge " + (club.registered ? "" : "neutral"),
-          club.attended
-            ? "Đã điểm danh"
-            : club.registered
-              ? "Đã tham gia"
-              : "Chưa tham gia",
+          "club-checkin-note",
+          club.checkin_open && state.event.checkin_open
+            ? "Đang mở điểm danh"
+            : "Chưa mở điểm danh",
         ),
       );
       heading.append(clubMark(club.name), copy);
       const button = node(
         "button",
-        "button " + (club.registered ? "secondary" : ""),
-        club.registered ? "Xem vé của tôi" : "Tham gia CLB",
+        "button secondary",
+        club.registered ? "Xem vé" : "Tham gia",
       );
       button.setAttribute(
         "aria-label",
@@ -808,23 +828,7 @@ function renderStudentCatalog() {
         if (!club.registered) await joinSelectedClub();
         else await showView("ticket");
       });
-      card.append(
-        heading,
-        node(
-          "p",
-          "",
-          club.description ||
-            "Kết nối và khám phá hoạt động cùng " + club.name + ".",
-        ),
-        node(
-          "span",
-          "club-checkin-note",
-          club.checkin_open && state.event.checkin_open
-            ? "Đang mở điểm danh"
-            : "Chưa mở điểm danh",
-        ),
-        button,
-      );
+      card.append(heading, button);
       return card;
     }),
   );

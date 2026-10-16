@@ -16,9 +16,9 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/ui/style.css?v=20261016-discovery" />
+    <link rel="stylesheet" href="/ui/style.css?v=20261016-workspace" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="/ui/app.js?v=20261016-discovery" defer></script>
+    <script src="/ui/app.js?v=20261016-workspace" defer></script>
   </head>
   <body>
     <svg
@@ -120,13 +120,11 @@
           <span>FIT CLUB DAY<small>HCMUTE · 2026</small></span></a
         >
         <div class="login-editorial">
-          <span class="eyebrow light">KẾT NỐI · KHÁM PHÁ · BỨT PHÁ</span>
-          <h1>
-            Một ngày hội.<br />Nhiều kết nối.<br /><em>Vô vàn trải nghiệm.</em>
-          </h1>
+          <span class="eyebrow">KHOA CÔNG NGHỆ THÔNG TIN · HCMUTE</span>
+          <h1>FIT Club Day<br />2026</h1>
           <p>
-            Gặp gỡ các câu lạc bộ học thuật,<br />khám phá công nghệ và viết
-            tiếp hành trình của bạn.
+            Cổng đăng ký và điểm danh ngày hội câu lạc bộ. Tìm CLB bạn quan tâm
+            và nhận vé tham gia tại đây.
           </p>
           <a class="story-link" href="/landingpage"
             >Khám phá FIT Club Day
@@ -134,7 +132,7 @@
           ></a>
         </div>
         <div class="login-partners">
-          <span>CÙNG CỘNG ĐỒNG CÔNG NGHỆ HCMUTE</span>
+          <span>Đơn vị đồng hành</span>
           <div>
             <img
               src="/assets/brand/hcmute.png"
@@ -150,8 +148,7 @@
       </div>
       <div class="login-side">
         <div class="login-box">
-          <span class="eyebrow">KHÔNG GIAN SỰ KIỆN</span>
-          <h2>Chào bạn,<br />hẹn gặp tại FIT!</h2>
+          <h2>Đăng nhập</h2>
           <p>
             Đăng nhập để nhận vé tham gia và điểm danh tại các gian hàng câu lạc
             bộ.
@@ -165,7 +162,7 @@
           </div>
         </div>
         <footer>
-          FIT Club Day 2026 <span>Được kết nối bởi cộng đồng.</span>
+          FIT Club Day 2026 <span>Khoa Công nghệ Thông tin · HCMUTE</span>
         </footer>
       </div>
     </section>
@@ -179,9 +176,9 @@
             width="64"
             height="46"
           />
-          <span>FIT CLUB DAY<small>KHÔNG GIAN SỰ KIỆN</small></span></a
+          <span>FIT Club Day<small>Khoa Công nghệ Thông tin</small></span></a
         >
-        <span class="nav-label">KHÔNG GIAN CỦA BẠN</span>
+        <span class="nav-label">SỰ KIỆN</span>
         <nav aria-label="Điều hướng chính">
           <button class="nav-item active" data-nav="overview">
             <svg class="icon"><use href="#i-grid" /></svg><span>Tổng quan</span>
@@ -204,12 +201,9 @@
           </button>
         </nav>
         <div class="sidebar-bottom">
-          <div class="sidebar-event">
-            <span class="eyebrow light">WHERE TECH MEETS DREAMS</span
-            ><strong>Cùng tạo nên<br />một ngày hội đáng nhớ.</strong
-            ><span class="sidebar-orbit" aria-hidden="true">✳</span
-            ><a href="/landingpage">Về trang sự kiện <span>↗</span></a>
-          </div>
+          <a class="sidebar-event" href="/landingpage"
+            >Thông tin sự kiện <span>↗</span></a
+          >
           <div class="sidebar-footer">
             <span class="status-dot"></span> FIT · HCMUTE <span>2026</span>
           </div>
@@ -237,7 +231,7 @@
               />
             </a>
             <div class="breadcrumb">
-              Không gian sự kiện <span>/</span
+              FIT Club Day <span>/</span
               ><strong id="breadcrumb">Tổng quan</strong>
             </div>
           </div>
@@ -273,14 +267,18 @@
           </div>
           <div class="page-heading">
             <div>
-              <span class="eyebrow" id="page-eyebrow"
-                >SẴN SÀNG CHO NGÀY HỘI</span
-              >
               <h1 id="page-title">Tổng quan sự kiện</h1>
-              <p id="page-description">Mỗi kết nối là một khởi đầu mới.</p>
+              <p id="page-description">
+                Đăng ký và theo dõi điểm danh tại các CLB.
+              </p>
             </div>
             <div class="actions">
-              <button id="reload" class="button secondary">
+              <button
+                id="reload"
+                class="button secondary"
+                aria-label="Làm mới dữ liệu"
+                title="Làm mới dữ liệu"
+              >
                 <svg class="icon"><use href="#i-refresh" /></svg
                 ><span>Làm mới</span></button
               ><button
@@ -297,17 +295,14 @@
             </div>
           </div>
           <div class="context-bar">
-            <label
+            <label class="event-picker"
               >Sự kiện<select id="events" aria-label="Chọn sự kiện">
                 <option value="">Chọn sự kiện…</option>
               </select></label
             >
             <div class="context-divider"></div>
-            <label
-              >Gian hàng câu lạc bộ<select
-                id="clubs"
-                aria-label="Chọn câu lạc bộ"
-              >
+            <label class="club-picker"
+              >Câu lạc bộ<select id="clubs" aria-label="Chọn câu lạc bộ">
                 <option value="">Chọn CLB…</option>
               </select></label
             ><span id="scope-label" class="scope-note"
@@ -340,10 +335,10 @@
           <div id="event-panel" hidden>
             <section data-view="overview">
               <div class="event-hero">
+                <div class="hero-art event-brand-art">
+                  <div id="hero-club-brand"></div>
+                </div>
                 <div class="hero-content">
-                  <span class="eyebrow light"
-                    >KHÁM PHÁ CÔNG NGHỆ, KẾT NỐI ĐAM MÊ</span
-                  >
                   <h2 id="event-title"></h2>
                   <p id="hero-subtitle"></p>
                   <div class="hero-meta">
@@ -352,13 +347,6 @@
                       ><span id="event-time"></span></span
                     ><span id="event-status" class="badge"></span>
                   </div>
-                </div>
-                <div class="hero-art event-brand-art">
-                  <div id="hero-club-brand"></div>
-                  <span class="hero-art-label" id="hero-brand-label"
-                    >FIT CLUB DAY 2026</span
-                  >
-                  <span class="hero-spark" aria-hidden="true">✳</span>
                 </div>
               </div>
               <div id="manager-overview" hidden>
@@ -392,7 +380,7 @@
                     <div>
                       <span>Chờ điểm danh</span
                       ><strong id="stat-pending">—</strong
-                      ><small>Sẵn sàng cho những kết nối mới</small>
+                      ><small>Đã đăng ký, chưa xác nhận</small>
                     </div>
                     <span class="stat-number">03</span>
                   </article>
@@ -401,7 +389,6 @@
                   <article class="panel">
                     <div class="panel-heading">
                       <div>
-                        <span class="eyebrow">BỨC TRANH TỔNG THỂ</span>
                         <h2>Tiến độ điểm danh</h2>
                       </div>
                       <span class="badge neutral" id="progress-scope"></span>
@@ -419,11 +406,6 @@
                         </div>
                       </div>
                       <div class="progress-details">
-                        <p>
-                          Mỗi lượt ghé thăm,<br /><strong
-                            >thêm một kết nối.</strong
-                          >
-                        </p>
                         <div>
                           <span class="legend blue-dot">Đã điểm danh</span
                           ><strong id="legend-attended">0</strong>
@@ -439,8 +421,7 @@
                   <article class="panel">
                     <div class="panel-heading">
                       <div>
-                        <span class="eyebrow">CẬP NHẬT GẦN NHẤT</span>
-                        <h2 id="activity-title">Vừa ghé gian hàng</h2>
+                        <h2 id="activity-title">Điểm danh gần đây</h2>
                       </div>
                       <span class="live-label"
                         ><span class="status-dot"></span>Đã đồng bộ</span
@@ -452,7 +433,6 @@
                 <article id="club-board-panel" class="panel" hidden>
                   <div class="panel-heading">
                     <div>
-                      <span class="eyebrow">CÙNG NHAU TẠO DẤU ẤN</span>
                       <h2>Các gian hàng CLB</h2>
                     </div>
                     <button class="button secondary" id="new-club">
@@ -469,21 +449,16 @@
               >
                 <div class="panel-heading">
                   <div>
-                    <span class="eyebrow">KHÁM PHÁ &amp; KẾT NỐI</span>
-                    <h2>Các gian hàng dành cho bạn</h2>
-                    <p>
-                      Chọn CLB để tham gia. Mỗi gian hàng có vé và kết quả
-                      riêng.
-                    </p>
+                    <h2>Câu lạc bộ</h2>
+                    <p>Chọn CLB bạn quan tâm để đăng ký tham gia.</p>
                   </div>
                   <span class="count-pill" id="catalog-count"></span>
                 </div>
                 <div id="student-clubs" class="student-clubs"></div>
               </article>
-              <div id="student-overview" class="overview-grid" hidden>
+              <div id="student-overview" class="student-support" hidden>
                 <article class="panel personal-welcome">
-                  <span class="eyebrow">HÀNH TRÌNH CỦA BẠN</span>
-                  <h2 id="student-status-title">Sẵn sàng khám phá?</h2>
+                  <h2 id="student-status-title">Đăng ký tham gia</h2>
                   <p id="student-status-text">
                     Mở vé cá nhân và đưa mã QR cho admin tại gian hàng để xác
                     nhận tham gia.
@@ -497,33 +472,14 @@
                     <svg class="icon"><use href="#i-arrow" /></svg>
                   </button>
                 </article>
-                <article class="panel">
-                  <span class="eyebrow">MỘT CHÚT CHUẨN BỊ</span>
-                  <h2>Gặp nhau tại gian hàng</h2>
-                  <ol class="steps">
-                    <li>
-                      <span>01</span>
-                      <div>
-                        <strong>Tham gia CLB yêu thích</strong>
-                        <p>Bấm Tham gia để nhận vé riêng của gian hàng.</p>
-                      </div>
-                    </li>
-                    <li>
-                      <span>02</span>
-                      <div>
-                        <strong>Hiển thị mã QR cá nhân</strong>
-                        <p>Mã tự làm mới trong lúc bạn mở vé.</p>
-                      </div>
-                    </li>
-                    <li>
-                      <span>03</span>
-                      <div>
-                        <strong>Để admin xác nhận</strong>
-                        <p>Trạng thái tham gia sẽ xuất hiện trên vé.</p>
-                      </div>
-                    </li>
-                  </ol>
-                </article>
+                <details class="participation-help">
+                  <summary>Cách tham gia và điểm danh</summary>
+                  <p>
+                    Bấm Tham gia CLB để nhận vé. Khi gian hàng mở điểm danh, mở
+                    Vé của tôi và đưa mã QR cho admin tại gian hàng. Kết quả
+                    được lưu riêng cho từng CLB.
+                  </p>
+                </details>
               </div>
             </section>
             <section data-view="participants" hidden>
@@ -531,7 +487,7 @@
                 <div class="panel-heading">
                   <div>
                     <h2>
-                      Danh sách người tham gia
+                      Danh sách
                       <span class="count-pill" id="student-total">0</span>
                     </h2>
                     <p>Danh sách và kết quả riêng của CLB đang chọn.</p>
@@ -555,7 +511,7 @@
                       name="search"
                       type="search"
                       aria-label="Tìm người tham gia"
-                      placeholder="Tìm theo họ tên, MSSV hoặc email"
+                      placeholder="Tên, MSSV hoặc email"
                       maxlength="200" /></label
                   ><label
                     ><span class="sr-only">Trạng thái điểm danh</span
@@ -567,7 +523,7 @@
                   ><button class="button secondary">Tìm kiếm</button>
                 </form>
                 <div class="table-wrap">
-                  <table>
+                  <table role="table">
                     <caption class="sr-only">
                       Danh sách người tham gia CLB
                     </caption>
@@ -611,7 +567,6 @@
                 <article class="panel">
                   <div class="panel-heading">
                     <div>
-                      <span class="eyebrow">CHÀO ĐÓN NHỮNG KẾT NỐI MỚI</span>
                       <h2>Quét mã QR cá nhân</h2>
                     </div>
                     <span class="badge neutral" id="scanner-club"></span>
@@ -626,7 +581,7 @@
                     ></video>
                     <div id="camera-placeholder">
                       <svg class="icon"><use href="#i-scan" /></svg
-                      ><strong>Sẵn sàng đón bạn</strong>
+                      ><strong>Quét QR của sinh viên</strong>
                       <p>
                         Đặt mã QR vào khung hình<br />để xác nhận tham gia gian
                         hàng.
@@ -657,7 +612,6 @@
                 </article>
                 <div>
                   <article class="panel">
-                    <span class="eyebrow">ĐÚNG GIAN HÀNG, ĐÚNG KẾT NỐI</span>
                     <h2 id="checkin-club-name"></h2>
                     <p>
                       Chỉ xác nhận cho người thuộc danh sách CLB này. Mã QR ở
@@ -743,13 +697,11 @@
                     </p>
                   </div>
                   <div class="ticket-bottom">
-                    <span>HCMUTE · FIT CLUB DAY</span
-                    ><span>LET'S CONNECT ↗</span>
+                    <span>HCMUTE · FIT CLUB DAY</span><span>Vé cá nhân</span>
                   </div>
                 </article>
-                <article class="panel ticket-help">
-                  <span class="eyebrow">BẠN ĐÃ SẴN SÀNG</span>
-                  <h2>Một lần quét.<br />Một dấu ấn mới.</h2>
+                <details class="ticket-help participation-help">
+                  <summary>Cách sử dụng vé</summary>
                   <p>
                     Đưa mã QR này cho admin tại gian hàng. Vé sẽ cập nhật khi
                     bạn được xác nhận tham gia.
@@ -766,7 +718,7 @@
                     <svg class="icon"><use href="#i-shield" /></svg
                     ><span>Chỉ bạn có thể mở vé của mình.</span>
                   </div>
-                </article>
+                </details>
               </div>
             </section>
             <section data-view="settings" hidden>
@@ -852,8 +804,7 @@
             aria-label="Đơn vị và cộng đồng đồng hành"
           >
             <div>
-              <span class="eyebrow">ĐƠN VỊ &amp; CỘNG ĐỒNG</span
-              ><strong>Cùng nhau tạo nên ngày hội.</strong>
+              <span>Đơn vị đồng hành</span>
             </div>
             <div class="community-logos">
               <img
@@ -902,7 +853,7 @@
           </section>
           <footer class="app-footer">
             <span>FIT CLUB DAY <b>2026</b></span
-            ><span>Khám phá công nghệ. Kết nối tương lai.</span>
+            ><a href="/landingpage">Thông tin sự kiện ↗</a>
           </footer>
         </main>
       </div>
