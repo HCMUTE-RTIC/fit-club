@@ -16,9 +16,9 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/ui/style.css?v=20261016-workspace" />
+    <link rel="stylesheet" href="/ui/style.css?v=20261016-tasks" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="/ui/app.js?v=20261016-workspace" defer></script>
+    <script src="/ui/app.js?v=20261016-tasks" defer></script>
   </head>
   <body>
     <svg
@@ -268,6 +268,7 @@
           <div class="page-heading">
             <div>
               <h1 id="page-title">Tổng quan sự kiện</h1>
+              <p id="current-scope" class="current-scope" hidden></p>
               <p id="page-description">
                 Đăng ký và theo dõi điểm danh tại các CLB.
               </p>
@@ -350,6 +351,34 @@
                 </div>
               </div>
               <div id="manager-overview" hidden>
+                <section
+                  id="checkin-workflow"
+                  class="checkin-workflow"
+                  aria-label="Điểm danh gian hàng"
+                  hidden
+                >
+                  <div>
+                    <h2>Điểm danh gian hàng</h2>
+                    <p id="checkin-workflow-note"></p>
+                  </div>
+                  <div class="actions">
+                    <button id="quick-checkin" class="button">
+                      <svg class="icon"><use href="#i-scan" /></svg
+                      ><span>Quét QR</span>
+                    </button>
+                    <button class="button secondary" data-go="participants">
+                      Xem danh sách
+                    </button>
+                    <button
+                      id="open-event-settings"
+                      class="button secondary"
+                      data-go="settings"
+                      hidden
+                    >
+                      Mở quản trị sự kiện
+                    </button>
+                  </div>
+                </section>
                 <div class="stats-grid">
                   <article class="stat-card">
                     <span class="stat-icon blue"
@@ -449,7 +478,7 @@
               >
                 <div class="panel-heading">
                   <div>
-                    <h2>Câu lạc bộ</h2>
+                    <h2>Chọn CLB để đăng ký</h2>
                     <p>Chọn CLB bạn quan tâm để đăng ký tham gia.</p>
                   </div>
                   <span class="count-pill" id="catalog-count"></span>
@@ -460,8 +489,8 @@
                 <article class="panel personal-welcome">
                   <h2 id="student-status-title">Đăng ký tham gia</h2>
                   <p id="student-status-text">
-                    Mở vé cá nhân và đưa mã QR cho admin tại gian hàng để xác
-                    nhận tham gia.
+                    Đăng ký CLB để nhận vé. Khi gian hàng mở điểm danh, dùng mã
+                    QR trên vé để xác nhận có mặt.
                   </p>
                   <button
                     class="button"
@@ -475,9 +504,9 @@
                 <details class="participation-help">
                   <summary>Cách tham gia và điểm danh</summary>
                   <p>
-                    Bấm Tham gia CLB để nhận vé. Khi gian hàng mở điểm danh, mở
-                    Vé của tôi và đưa mã QR cho admin tại gian hàng. Kết quả
-                    được lưu riêng cho từng CLB.
+                    Bấm Đăng ký để nhận vé. Khi gian hàng mở điểm danh, mở Vé
+                    của tôi và đưa mã QR cho admin tại gian hàng. Kết quả được
+                    lưu riêng cho từng CLB.
                   </p>
                 </details>
               </div>
@@ -583,8 +612,8 @@
                       <svg class="icon"><use href="#i-scan" /></svg
                       ><strong>Quét QR của sinh viên</strong>
                       <p>
-                        Đặt mã QR vào khung hình<br />để xác nhận tham gia gian
-                        hàng.
+                        Đặt mã QR vào khung hình<br />để xác nhận điểm danh tại
+                        gian hàng.
                       </p>
                     </div>
                     <div class="scan-frame" aria-hidden="true"></div>
@@ -671,7 +700,18 @@
                         <span id="ticket-student-id"></span>
                       </div>
                     </div>
+                    <span
+                      id="ticket-stage"
+                      class="badge neutral"
+                      role="status"
+                    ></span>
                     <div id="ticket-status" class="alert"></div>
+                    <button id="join-club" class="button full-width" hidden>
+                      Đăng ký CLB này
+                    </button>
+                    <button id="get-qr" class="button full-width">
+                      Hiển thị mã QR
+                    </button>
                     <div id="qr" class="qr-area">
                       <svg class="icon"><use href="#i-ticket" /></svg>
                       <p>Mã QR sẽ hiển thị tại đây.</p>
@@ -685,13 +725,7 @@
                         aria-label="Thời gian hiệu lực mã QR"
                       ></progress>
                     </div>
-                    <button id="join-club" class="button full-width" hidden>
-                      Tham gia CLB này
-                    </button>
-                    <button id="get-qr" class="button full-width">
-                      Hiển thị mã QR
-                    </button>
-                    <p class="hint center">
+                    <p id="ticket-code-help" class="hint center">
                       Mỗi mã chỉ dùng cho gian hàng đang chọn.<br />Giữ mã trên
                       thiết bị của bạn khi điểm danh.
                     </p>
@@ -704,7 +738,7 @@
                   <summary>Cách sử dụng vé</summary>
                   <p>
                     Đưa mã QR này cho admin tại gian hàng. Vé sẽ cập nhật khi
-                    bạn được xác nhận tham gia.
+                    bạn được xác nhận điểm danh.
                   </p>
                   <div class="info-line">
                     <svg class="icon"><use href="#i-refresh" /></svg
@@ -738,9 +772,9 @@
                     <div>
                       <strong>Mở sự kiện cho sinh viên</strong>
                       <p>
-                        Sinh viên thấy sự kiện và tự tham gia CLB khi mở. Mỗi
-                        CLB cần mở điểm danh riêng để dùng QR; đóng sự kiện sẽ
-                        tạm dừng tất cả gian hàng.
+                        Sinh viên thấy sự kiện và tự đăng ký CLB khi mở. Mỗi CLB
+                        cần mở điểm danh riêng để dùng QR; đóng sự kiện sẽ tạm
+                        dừng tất cả gian hàng.
                       </p>
                     </div>
                     <button id="toggle-event" class="button secondary"></button>

@@ -4,7 +4,7 @@
   background: #f6f7f9;
   --navy: #17365b;
   --blue: #2158a8;
-  --muted: #66717f;
+  --muted: #596575;
   --border: #e1e5eb;
   font-size: 14px;
   line-height: 1.6;
@@ -233,7 +233,7 @@ textarea::placeholder {
 }
 .hint {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.75;
   margin-top: 12px;
 }
@@ -277,7 +277,7 @@ textarea::placeholder {
   border-radius: 4px;
   background: #eaf4ed;
   color: #286346;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.7;
   white-space: nowrap;
@@ -660,6 +660,14 @@ textarea::placeholder {
   justify-content: flex-end;
   padding-top: 2px;
 }
+.page-heading .current-scope {
+  color: #405674;
+  font-size: 13px;
+  margin-top: 5px;
+}
+.current-scope:not([hidden]) + #page-description {
+  display: none;
+}
 .context-bar {
   display: flex;
   align-items: center;
@@ -669,11 +677,11 @@ textarea::placeholder {
   border-bottom: 1px solid var(--border);
 }
 .context-bar label {
-  width: 250px;
-  max-width: 35%;
+  width: min(320px, 100%);
+  max-width: none;
   min-width: 0;
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .context-bar select {
@@ -697,6 +705,18 @@ textarea::placeholder {
   display: none;
 }
 #workspace[data-role="student"][data-current-view="overview"][data-single-event="true"]
+  .context-bar {
+  display: none;
+}
+#workspace[data-single-event="true"] .event-picker {
+  display: none;
+}
+#workspace[data-single-club="true"]:not([data-role="superadmin"]) .club-picker {
+  display: none;
+}
+#workspace[data-single-event="true"][data-single-club="true"]:not(
+    [data-role="superadmin"]
+  )
   .context-bar {
   display: none;
 }
@@ -769,11 +789,37 @@ textarea::placeholder {
   margin-bottom: 20px;
 }
 .panel-heading p {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 5px;
 }
 .panel-heading .eyebrow {
   display: none;
+}
+.checkin-workflow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  background: #edf3fa;
+  border: 1px solid #d2deed;
+  border-radius: 8px;
+}
+.checkin-workflow > div:first-child {
+  min-width: 0;
+}
+.checkin-workflow p {
+  font-size: 14px;
+  margin-top: 6px;
+  max-width: 470px;
+}
+.checkin-workflow .actions {
+  flex-shrink: 0;
+}
+#quick-checkin {
+  min-height: 48px;
+  font-size: 14px;
 }
 .stats-grid {
   display: grid;
@@ -820,6 +866,7 @@ textarea::placeholder {
 }
 .overview-grid {
   display: grid;
+  align-items: start;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 24px;
@@ -924,12 +971,12 @@ textarea::placeholder {
   display: block;
 }
 .person-info strong {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 550;
   overflow-wrap: anywhere;
 }
 .person-info small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 3px;
   overflow-wrap: anywhere;
@@ -1074,7 +1121,7 @@ progress::-webkit-progress-value {
   overflow-wrap: anywhere;
 }
 .student-club-description {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 3px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -1083,8 +1130,8 @@ progress::-webkit-progress-value {
 }
 .club-checkin-note {
   display: block;
-  font-size: 11px;
-  color: #7b8593;
+  font-size: 13px;
+  color: #596575;
   margin-top: 3px;
 }
 .student-club-card .button {
@@ -1414,6 +1461,10 @@ td time {
 }
 .ticket-body {
   padding: 24px;
+}
+#ticket-stage {
+  margin-bottom: 12px;
+  font-size: 13px;
 }
 .ticket-person {
   display: flex;
@@ -1747,6 +1798,11 @@ dialog::backdrop {
   }
 }
 @media (max-width: 1200px) {
+  .checkin-workflow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
   .breadcrumb {
     display: none;
   }
@@ -1978,12 +2034,12 @@ dialog::backdrop {
     font-size: 10px;
   }
   .page-content {
-    padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+    padding: 18px 20px calc(88px + env(safe-area-inset-bottom));
   }
   .page-heading {
     gap: 16px;
     align-items: flex-start;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
   .page-heading > div:first-child {
     min-width: 0;
@@ -1992,6 +2048,9 @@ dialog::backdrop {
     font-size: 13px;
     line-height: 1.7;
     margin-top: 7px;
+  }
+  #page-description {
+    display: none;
   }
   .page-heading .actions {
     flex-shrink: 0;
@@ -2013,15 +2072,15 @@ dialog::backdrop {
   }
   .context-bar {
     gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 24px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
     align-items: flex-start;
   }
   .context-bar label {
     flex: 1;
     width: 50%;
     max-width: none;
-    font-size: 11px;
+    font-size: 12px;
   }
   .context-bar select {
     font-size: 16px;
@@ -2032,8 +2091,8 @@ dialog::backdrop {
   }
   .event-hero {
     gap: 14px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
     align-items: flex-start;
   }
   .event-brand-art .club-logo {
@@ -2044,17 +2103,17 @@ dialog::backdrop {
     font-size: 19px;
   }
   .event-hero p {
-    font-size: 12px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.6;
     margin-top: 3px;
   }
   .hero-meta {
     gap: 7px 12px;
-    font-size: 11px;
+    font-size: 12px;
     margin-top: 10px;
   }
   .hero-meta .badge {
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 6px;
   }
   .hero-meta .icon {
@@ -2069,7 +2128,17 @@ dialog::backdrop {
     margin-bottom: 16px;
   }
   .panel-heading p {
-    font-size: 12px;
+    font-size: 14px;
+  }
+  .checkin-workflow {
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .checkin-workflow .actions {
+    width: 100%;
+  }
+  #quick-checkin {
+    flex: 1;
   }
   .stats-grid {
     margin-bottom: 20px;
@@ -2079,7 +2148,7 @@ dialog::backdrop {
     padding: 0 14px;
   }
   .stat-card div > span {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.6;
   }
   .stat-card strong {
@@ -2106,17 +2175,17 @@ dialog::backdrop {
     font-size: 24px;
   }
   .donut span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .progress-details > div {
-    font-size: 11px;
+    font-size: 12px;
     gap: 10px;
   }
   .recent-row {
     gap: 10px;
   }
   .recent-row .badge {
-    font-size: 10px;
+    font-size: 12px;
   }
   .club-board {
     grid-template-columns: minmax(0, 1fr);
@@ -2131,7 +2200,7 @@ dialog::backdrop {
     margin-bottom: 18px;
   }
   .student-catalog .panel-heading p {
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 5px;
   }
   .student-club-card {
@@ -2153,15 +2222,15 @@ dialog::backdrop {
     font-size: 16px;
   }
   .student-club-title .badge {
-    font-size: 10px;
+    font-size: 12px;
     padding: 1px 5px;
   }
   .student-club-description {
-    font-size: 12px;
+    font-size: 14px;
     -webkit-line-clamp: 1;
   }
   .club-checkin-note {
-    font-size: 11px;
+    font-size: 13px;
     margin-top: 3px;
   }
   .student-club-card .button {
@@ -2333,8 +2402,25 @@ dialog::backdrop {
   .ticket-body {
     padding: 20px;
   }
+  .ticket-top {
+    position: relative;
+    padding: 16px 20px;
+  }
   .ticket-branding {
-    margin-bottom: 14px;
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    margin: 0;
+  }
+  .ticket-branding .eyebrow {
+    display: none;
+  }
+  .ticket-event-logo {
+    width: 46px;
+    height: 38px;
+  }
+  .ticket-club-identity {
+    padding-right: 60px;
   }
   .ticket-club-identity h2 {
     font-size: 23px;
@@ -2344,7 +2430,8 @@ dialog::backdrop {
     height: 46px;
   }
   .ticket-top > p {
-    font-size: 11px;
+    font-size: 12px;
+    margin-top: 8px;
   }
   .ticket-person {
     margin-bottom: 18px;

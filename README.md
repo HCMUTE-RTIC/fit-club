@@ -21,7 +21,7 @@ Dự án quản lý và điểm danh tự động qua mã QR cho sự kiện **F
 
 **Sự kiện → gian hàng CLB → admin / danh sách / điểm danh riêng.** Superadmin điều phối toàn sự kiện; admin chỉ quản lý CLB được gán. Một sinh viên có thể tham gia nhiều CLB và có kết quả độc lập tại mỗi gian hàng.
 
-Superadmin tạo sự kiện, tạo các CLB và gán admin bằng email. Khi sự kiện được mở, sinh viên thấy tổng quan, xem các gian hàng và tự bấm **Tham gia CLB** để nhận vé. Admin cũng có thể thêm hoặc nhập danh sách. Mã QR dùng được khi cả sự kiện và gian hàng đã mở điểm danh, và tự làm mới sau thời hạn hiệu lực.
+Superadmin tạo sự kiện, tạo các CLB và gán admin bằng email. Khi sự kiện được mở, sinh viên thấy tổng quan, xem các gian hàng và tự bấm **Đăng ký** để nhận vé. Admin cũng có thể thêm hoặc nhập danh sách. Mã QR dùng được khi cả sự kiện và gian hàng đã mở điểm danh, và tự làm mới sau thời hạn hiệu lực.
 
 Xem [hướng dẫn API và vận hành](backend/README.md) và [rà soát BA-Kit, tiêu chí nghiệm thu, backlog](docs/BA_REVIEW.md).
 

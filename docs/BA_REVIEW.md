@@ -21,7 +21,7 @@ Nguồn các mục: `docs/knowledge_base/specialized/ux_research.md`, `validatio
 2. FIT Club Day là sự kiện chung gồm nhiều CLB tham gia.
 3. Admin chỉ quản lý danh sách của CLB được gán; superadmin xem toàn bộ.
 4. Điểm danh độc lập tại từng gian hàng CLB.
-5. Sinh viên tự bấm **Tham gia CLB** khi sự kiện đang mở; admin tiếp tục chỉ quản lý danh sách CLB mình.
+5. Sinh viên tự bấm **Đăng ký** khi sự kiện đang mở; admin tiếp tục chỉ quản lý danh sách CLB mình.
 
 Sinh viên có thể thuộc nhiều CLB; admin có thể thêm/import danh sách và sinh viên có thể tự tham gia khi sự kiện mở. Cả sự kiện và gian hàng phải mở để điểm danh QR. Danh sách cũ chưa phân loại được giữ riêng, không tự đoán CLB.
 
@@ -69,7 +69,9 @@ Backlog hiện có 12 nhóm yêu cầu, với 2 Must, 3 Should, 2 Could và 5 Wo
 | FR-06 | File hợp lệ thêm đúng vào CLB; dòng trùng báo riêng | File có dòng sai không thêm dòng nào; giới hạn dung lượng / dòng / giải nén giữ nguyên; không lọt sang CLB khác | `test_clubs.py`: scoped atomic import; test API cũ kiểm tra parser dùng chung |
 | FR-07 | Tài khoản chưa đăng ký thấy sự kiện mở, tự tham gia CLB và nhận vé | Chỉ đăng ký cho mình; gọi lặp không thêm trùng; đóng sự kiện ngăn đăng ký; QR vẫn đợi gian hàng mở; không có quyền xem roster CLB | `test_discovery.py` và browser journey ở 360/390/768 px |
 
-Yêu cầu giao diện bổ sung: các luồng mới được kiểm tra ở 360, 390, 768, 1024 và 1440 px, thêm quản trị / form ở 375 px; không tràn ngang toàn trang. Mobile chuyển danh sách người tham gia thành từng hàng thông tin để tên và email dễ đọc; bảng trên tablet cuộn trong vùng riêng. Nút tham gia có vùng chạm tối thiểu 44 px và thao tác đầu tiên nằm trong màn hình mobile. Chuyển màn đưa nội dung về đầu trang. Menu Tài khoản hiển thị email đăng nhập. Trang đang trống tự cập nhật khi sự kiện được mở. Dialog có đóng / hủy / Escape; camera và QR dừng khi rời ngữ cảnh; không dựng dữ liệu người dùng bằng HTML chưa escape.
+Yêu cầu giao diện bổ sung: các luồng mới được kiểm tra ở 360, 390, 768, 1024 và 1440 px, thêm quản trị / form ở 375 px; không tràn ngang toàn trang. Mobile chuyển danh sách người tham gia thành từng hàng thông tin để tên và email dễ đọc; bảng trên tablet cuộn trong vùng riêng. Nút đăng ký có vùng chạm tối thiểu 44 px và thao tác đầu tiên nằm trong màn hình mobile. Chuyển màn đưa nội dung về đầu trang. Menu Tài khoản hiển thị email đăng nhập. Trang đang trống tự cập nhật khi sự kiện được mở. Dialog có đóng / hủy / Escape; camera và QR dừng khi rời ngữ cảnh; không dựng dữ liệu người dùng bằng HTML chưa escape.
+
+Sau lượt tự rà UX: admin mở đúng CLB từ Tổng quan và vào màn quét, không mở CLB khác; sự kiện đóng chặn thao tác. Vé theo dõi từ đăng ký đến chờ / sẵn sàng điểm danh và xác nhận sau quét thật trong test. Trên viewport 375 × 844, nút mở QR không nằm sau một khung trống và toàn bộ mã hiển thị ngoài vùng header / điều hướng cố định. Những kiểm tra này xác nhận hành vi và bố cục đã nêu, chưa thay thế quan sát người dùng thực tế tại gian hàng.
 
 ## Reflection Mode (System 2)
 
@@ -85,7 +87,7 @@ Yêu cầu giao diện bổ sung: các luồng mới được kiểm tra ở 360
 
 Khuyến nghị: đủ điều kiện bàn giao bản sửa để chủ dự án xem và chạy UAT. Người nhận tiếp theo là chủ dự án / đại diện CLB để xác nhận hành trình thực tế; nếu phát hiện thiếu quy tắc, quay lại `ba-master` để bổ sung phạm vi trước khi mở rộng.
 
-Kết quả thực thi ngày 16/10/2026: **129 test qua**, gồm 115 test API và 14 trường hợp trình duyệt. Có một cảnh báo deprecation từ Starlette TestClient; không có test lỗi. `node --check frontend/app.js` và `git diff --check` qua. CI chạy toàn bộ test API. Ảnh kiểm tra bố cục nằm tại `docs/previews/`; số liệu trên ảnh là dữ liệu giả lập. Các quyết định bố cục sau phản hồi của chủ dự án được ghi tại `docs/UI_DESIGN.md`.
+Kết quả thực thi ngày 16/10/2026: **133 test qua**, gồm 115 test API và 18 trường hợp trình duyệt. Có một cảnh báo deprecation từ Starlette TestClient; không có test lỗi. `node --check frontend/app.js` và `git diff --check` qua. CI chạy toàn bộ test API. Ảnh kiểm tra bố cục nằm tại `docs/previews/`; số liệu trên ảnh là dữ liệu giả lập. Các quyết định bố cục sau phản hồi của chủ dự án được ghi tại `docs/UI_DESIGN.md`.
 
 Nhận diện giao diện: logo HCMUTE, FIT, RTIC, DSC và ISC dùng file PNG gốc sao chép nguyên vẹn; nguồn được ghi ở `assets/brand/SOURCES.md`. Logo sự kiện và đơn vị còn lại dùng bản cắt từ poster gốc. Logo theo CLB được đồng bộ ở dashboard, danh sách gian hàng và vé sinh viên; có test chuyển CLB kiểm tra cả hình nhận diện lẫn tên vé.
 

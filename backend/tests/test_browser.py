@@ -47,9 +47,9 @@ def browser(api):
         sock.close()
 
 
-def signed_page(browser, headers, width=1440):
+def signed_page(browser, headers, width=1440, height=1000):
     chromium, base_url = browser
-    page = chromium.new_page(viewport={'width': width, 'height': 1000})
+    page = chromium.new_page(viewport={'width': width, 'height': height})
     page.route('https://accounts.google.com/**', lambda route: route.fulfill(body=''))
     token = headers['Authorization'][7:]
     page.add_init_script(f"sessionStorage.setItem('fit-token', {json.dumps(token)})")
@@ -58,7 +58,7 @@ def signed_page(browser, headers, width=1440):
     return page
 
 
-def screenshot(page, tmp_path, name):
+def screenshot(page, tmp_path, name, full_page=True):
     folder = Path(os.environ.get('FITCLUB_PREVIEW_DIR', str(tmp_path)))
     folder.mkdir(parents=True, exist_ok=True)
     page.locator('img').evaluate_all("""async images => {
@@ -67,22 +67,30 @@ def screenshot(page, tmp_path, name):
             return image.decode().catch(() => {});
         }));
     }""")
-    page.evaluate('window.scrollTo(0, 0)')
-    page.screenshot(path=str(folder / name), full_page=True)
+    if full_page:
+        page.evaluate('window.scrollTo(0, 0)')
+    page.screenshot(path=str(folder / name), full_page=full_page)
 
 
 def test_student_navigation_and_mobile_ticket(api, monkeypatch, browser, tmp_path):
     _, _, _, student, _, _, _ = setup_clubs(api, monkeypatch)
     student = auth(api, monkeypatch, '10000003', name='Nguyễn Minh Anh')
-    page = signed_page(browser, student, 375)
+    page = signed_page(browser, student, 375, 844)
     try:
         pw.expect(page.locator('#workspace')).to_be_visible()
         pw.expect(page.get_by_role('button', name='Vé của tôi', exact=True)).to_be_visible()
         pw.expect(page.get_by_role('button', name='Người tham gia', exact=True)).to_be_hidden()
         pw.expect(page.get_by_role('button', name='Quét điểm danh', exact=True)).to_be_hidden()
         page.get_by_role('button', name='Vé của tôi', exact=True).click()
+        pw.expect(page.locator('#get-qr')).to_be_enabled()
+        action = page.locator('#get-qr').bounding_box()
+        nav = page.get_by_role('navigation', name='Điều hướng chính').bounding_box()
+        assert action['y'] + action['height'] <= nav['y'], 'Opening QR should not require scrolling past an empty QR frame'
         page.get_by_role('button', name='Hiển thị mã QR', exact=True).click()
         pw.expect(page.get_by_alt_text('QR điểm danh cá nhân')).to_be_visible()
+        code = page.get_by_alt_text('QR điểm danh cá nhân').bounding_box()
+        assert code['y'] >= 64 and code['y'] + code['height'] <= nav['y'], 'The entire QR must be clear of fixed navigation'
+        screenshot(page, tmp_path, 'student-qr-mobile.png', full_page=False)
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         screenshot(page, tmp_path, 'student-mobile.png')
     finally:
@@ -223,11 +231,11 @@ def test_new_student_discovers_and_joins_club_on_mobile(api, monkeypatch, browse
         pw.expect(page.locator('#event-title')).to_be_visible()
         pw.expect(page.locator('.student-club-card')).to_have_count(5)
         if width < 768:
-            first_join = page.get_by_role('button', name='Tham gia DSC', exact=True)
+            first_join = page.get_by_role('button', name='Đăng ký DSC', exact=True)
             first_bounds = first_join.bounding_box()
             nav_bounds = page.get_by_role('navigation', name='Điều hướng chính').bounding_box()
             assert first_bounds['y'] + first_bounds['height'] <= nav_bounds['y'], 'The first join action must be reachable before scrolling'
-        join = page.get_by_role('button', name='Tham gia RTIC', exact=True)
+        join = page.get_by_role('button', name='Đăng ký RTIC', exact=True)
         pw.expect(join).to_be_visible()
         assert join.bounding_box()['height'] >= 44
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -236,7 +244,7 @@ def test_new_student_discovers_and_joins_club_on_mobile(api, monkeypatch, browse
         elif width == 1440:
             screenshot(page, tmp_path, 'student-overview-desktop.png')
         join.click()
-        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã tham gia')
+        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã đăng ký')
         assert api.get(f'/events/{eid}/clubs/{cid}/students', headers=root).json()['total'] == 1
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         if width == 390:
@@ -261,10 +269,10 @@ def test_student_page_updates_when_organizer_opens_event(api, monkeypatch, brows
         assert api.put(f'/events/{eid}', headers=root, json=body).status_code == 200
         pw.expect(page.locator('#event-title')).to_be_visible(timeout=15000)
         cid = club(api, root, eid, 'RTIC', opened=False)
-        join = page.get_by_role('button', name='Tham gia RTIC', exact=True)
+        join = page.get_by_role('button', name='Đăng ký RTIC', exact=True)
         pw.expect(join).to_be_visible(timeout=15000)
         join.click()
-        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã tham gia')
+        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã đăng ký')
         assert api.get(f'/events/{eid}/clubs/{cid}/students', headers=root).json()['total'] == 1
     finally:
         page.close()
@@ -290,5 +298,77 @@ def test_manager_can_add_participant_and_open_scanner_on_phone(api, monkeypatch,
         pw.expect(page.get_by_role('button', name='Bật camera', exact=True)).to_be_visible()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         assert api.get(f'/events/{eid}/clubs/{cid}/students', headers=admin).json()['total'] == 2
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize('width', [360, 1440])
+def test_admin_can_open_booth_and_reach_scanner_from_overview(api, monkeypatch, browser, width, tmp_path):
+    root, admin, _, _, eid, cid, other = setup_clubs(api, monkeypatch)
+    base = f'/events/{eid}/clubs/{cid}'
+    api.patch(base + '/checkin', headers=root, json={'checkin_open': False})
+    api.patch(f'/events/{eid}/clubs/{other}/checkin', headers=root, json={'checkin_open': False})
+    page = signed_page(browser, admin, width, 780)
+    try:
+        start = page.locator('#quick-checkin')
+        pw.expect(start).to_be_visible()
+        pw.expect(start).to_be_enabled()
+        bounds = start.bounding_box()
+        assert bounds['height'] >= 44
+        assert bounds['y'] + bounds['height'] <= (712 if width < 768 else 780)
+        if width == 360:
+            screenshot(page, tmp_path, 'manager-ready-mobile.png')
+        start.click()
+        pw.expect(page.get_by_role('button', name='Bật camera', exact=True)).to_be_visible()
+        booths = api.get(f'/events/{eid}/clubs', headers=root).json()
+        assert next(item for item in booths if item['id'] == cid)['checkin_open'] is True
+        assert next(item for item in booths if item['id'] == other)['checkin_open'] is False
+        assert api.get(base + '/summary', headers=admin).json()['attended'] == 0
+        page.get_by_role('button', name='Tổng quan', exact=True).click()
+        pw.expect(start).to_have_text('Quét QR')
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    finally:
+        page.close()
+
+
+def test_overview_checkin_action_respects_closed_event(api, monkeypatch, browser):
+    root, admin, _, _, eid, cid, _ = setup_clubs(api, monkeypatch)
+    api.put(f'/events/{eid}', headers=root, json={'title': 'FIT Club Day', 'starts_at': '2026-10-17T08:00:00+07:00', 'checkin_open': False})
+    page = signed_page(browser, admin, 390, 844)
+    try:
+        pw.expect(page.locator('#quick-checkin')).to_be_visible()
+        pw.expect(page.locator('#quick-checkin')).to_be_disabled()
+        pw.expect(page.locator('#checkin-workflow-note')).to_contain_text('Sự kiện đang đóng')
+        assert api.get(f'/events/{eid}/clubs/{cid}/summary', headers=admin).json()['attended'] == 0
+    finally:
+        page.close()
+
+
+def test_student_ticket_distinguishes_registration_waiting_and_attendance(api, monkeypatch, browser):
+    root = auth(api, monkeypatch)
+    eid = event(api, root, 'FIT Club Day')
+    cid = club(api, root, eid, 'RTIC', opened=False)
+    base = f'/events/{eid}/clubs/{cid}'
+    student = auth(api, monkeypatch, '10000003')
+    api.post(base + '/join', headers=student)
+    page = signed_page(browser, student, 390, 844)
+    try:
+        page.get_by_role('button', name='Vé của tôi', exact=True).click()
+        pw.expect(page.locator('#ticket-stage')).to_have_text('Chờ điểm danh')
+        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã đăng ký')
+        pw.expect(page.locator('#get-qr')).to_be_hidden()
+        assert api.get(base + '/summary', headers=root).json()['attended'] == 0
+        api.patch(base + '/checkin', headers=root, json={'checkin_open': True})
+        page.locator('#reload').click()
+        pw.expect(page.locator('#ticket-stage')).to_have_text('Sẵn sàng điểm danh')
+        page.locator('#get-qr').click()
+        pw.expect(page.get_by_alt_text('QR điểm danh cá nhân')).to_be_visible()
+        qr = api.get(base + '/qr', headers=student).json()
+        api.post(base + '/attendance/scan', headers=root, json={'token': qr['token']})
+        page.locator('#reload').click()
+        pw.expect(page.locator('#ticket-stage')).to_have_text('Đã điểm danh')
+        pw.expect(page.locator('#ticket-status')).to_contain_text('Đã điểm danh')
+        pw.expect(page.locator('#get-qr')).to_be_hidden()
+        pw.expect(page.locator('#join-club')).to_be_hidden()
     finally:
         page.close()

@@ -27,7 +27,7 @@ Token trả về dùng `Authorization: Bearer <access_token>`. Hết phiên sau 
 
 - Superadmin: email bootstrap nằm trong `SUPERADMIN_EMAILS` hoặc được superadmin khác cấp quyền. Có thể dùng Gmail đã xác minh; cấu hình không bỏ qua xác thực Google.
 - Admin: được superadmin gán theo CLB; có thể dùng email Google ngoài trường đã được cấp quyền. Quyền được đọc từ DB trong từng request.
-- Sinh viên: thấy các sự kiện đang mở và những sự kiện mình đã tham gia; tự bấm Tham gia CLB để nhận vé riêng, nhận QR khi gian hàng mở điểm danh.
+- Sinh viên: thấy các sự kiện đang mở và những sự kiện mình đã tham gia; tự bấm Đăng ký để nhận vé riêng, nhận QR khi gian hàng mở điểm danh.
 
 ## API chính
 
