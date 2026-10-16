@@ -53,6 +53,13 @@ class ClubAttendance(core.Base):
 router = APIRouter(tags=['Gian hàng CLB'])
 
 
+@router.get('/events/discover')
+def discover_events(user=Depends(core.current), session: Session = Depends(core.db)):
+    """Expose open-event metadata, without granting access to any participant list."""
+    query = select(core.Event).where(core.Event.checkin_open.is_(True)).order_by(core.Event.starts_at.desc())
+    return [core.event_data(item) for item in session.scalars(query)]
+
+
 def get_club(session, event_id, club_id):
     core.get_event(session, event_id)
     item = session.get(Club, club_id)
@@ -117,6 +124,36 @@ def list_clubs(event_id: int, user=Depends(core.current), session: Session = Dep
     return [{**club_data(item), 'can_manage': can_manage(session, user, item.id),
              'registered': session.get(ClubRegistration, (item.id, user.id)) is not None}
             for item in session.scalars(query)]
+
+
+@router.get('/events/{event_id}/clubs/discover')
+def discover_clubs(event_id: int, user=Depends(core.current), session: Session = Depends(core.db)):
+    if not core.get_event(session, event_id).checkin_open:
+        return []
+    clubs = session.scalars(select(Club).where(Club.event_id == event_id).order_by(Club.name))
+    result = []
+    for item in clubs:
+        attended = session.scalar(select(ClubAttendance.id).where(ClubAttendance.club_id == item.id, ClubAttendance.user_id == user.id)) is not None
+        result.append({**club_data(item), 'can_manage': can_manage(session, user, item.id),
+                       'registered': session.get(ClubRegistration, (item.id, user.id)) is not None,
+                       'attended': attended})
+    return result
+
+
+@router.post('/events/{event_id}/clubs/{club_id}/join')
+def join_club(event_id: int, club_id: int, user=Depends(core.current), session: Session = Depends(core.db)):
+    item = get_club(session, event_id, club_id)
+    if not core.get_event(session, event_id).checkin_open:
+        raise HTTPException(409, 'Sự kiện đang đóng đăng ký tham gia')
+    core.student_email(user.email)
+    register_student(session, event_id, club_id, user.email, user.name)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        if not session.get(ClubRegistration, (club_id, user.id)):
+            raise HTTPException(409, 'Có thay đổi đồng thời; hãy thử tham gia lại')
+    return {**core.profile(user), 'registered': True, 'club': club_data(item)}
 
 
 @router.patch('/events/{event_id}/clubs/{club_id}/checkin')
@@ -271,7 +308,7 @@ def event_summary(event_id: int, user=Depends(core.superuser), session: Session 
 def my_status(event_id: int, club_id: int, user=Depends(core.current), session: Session = Depends(core.db)):
     item = get_club(session, event_id, club_id)
     registered = session.get(ClubRegistration, (club_id, user.id)) is not None
-    if not registered and not can_manage(session, user, club_id):
+    if not registered and not can_manage(session, user, club_id) and not core.get_event(session, event_id).checkin_open:
         raise HTTPException(403, 'Bạn chưa được thêm vào CLB này')
     attendance = session.scalar(select(ClubAttendance).where(ClubAttendance.club_id == club_id, ClubAttendance.user_id == user.id))
     return {**core.attendance_data(user, attendance), 'registered': registered, 'club': club_data(item)}

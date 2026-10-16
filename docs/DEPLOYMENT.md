@@ -66,6 +66,14 @@ API: `POST /access/grants`, Bearer của superadmin:
 
 Thu hồi qua API / giao diện quản trị hiện có. Quyền được kiểm tra từ DB trong từng request; email ngoài trường bị từ chối đăng nhập mới sau khi không còn quyền.
 
+## Mở sự kiện và tiếp nhận sinh viên
+
+Superadmin mở sự kiện để sinh viên thấy tổng quan và danh sách gian hàng. Sinh viên bấm **Tham gia CLB**; API chỉ thêm chính tài khoản đã xác thực, có xử lý đăng ký trùng. Admin CLB thấy danh sách mới sau làm mới / đồng bộ, nhưng không được xem danh sách của CLB khác.
+
+Mở sự kiện chưa tự mở điểm danh cho từng gian hàng. Admin chọn CLB → **Quét điểm danh** → **Mở điểm danh CLB** khi sẵn sàng. Vé của sinh viên phân biệt rõ đăng ký và đã điểm danh.
+
+Giao diện có menu **Tài khoản** hiển thị email Google đang dùng, giúp phân biệt tài khoản sinh viên và tài khoản superadmin. Các trang đã mở từ bản cũ cần tải lại để nhận JavaScript/CSS mới.
+
 ## Kiểm tra và rollback
 
 Kiểm tra `systemctl status fit-club-event`, `https://event.hcmutertic.com/health`, schema `/openapi.json`, hình logo và trạng thái TLS. Login thật chỉ xác nhận sau khi có Web Client ID và đăng nhập bằng tài khoản Google.

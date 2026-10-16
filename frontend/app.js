@@ -18,6 +18,7 @@ const state = {
   qrRun: 0,
   qrTimer: null,
   qrWanted: false,
+  studentEmailOnly: true,
 };
 const views = {
   overview: [
@@ -297,6 +298,7 @@ async function bootUser(preferred = {}) {
   if (token !== state.token || epoch !== state.epoch) return;
   state.me = identity;
   $("my-name").textContent = state.me.name;
+  $("account-email").textContent = state.me.email;
   $("my-avatar").textContent = initials(state.me.name);
   $("my-role").textContent = {
     superadmin: "Ban tổ chức · Superadmin",
@@ -316,6 +318,24 @@ function emptyState(title, message) {
     ? "Thêm gian hàng CLB"
     : "Tạo sự kiện đầu tiên";
 }
+async function workspaceEvents() {
+  const assigned = await api("/events");
+  if (state.me?.role !== "student") return assigned;
+  const catalog = await api("/events/discover");
+  return [
+    ...new Map(
+      [...catalog, ...assigned].map((item) => [item.id, item]),
+    ).values(),
+  ].sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at));
+}
+async function workspaceClubs() {
+  return api(
+    eventPath() +
+      (state.me?.role === "student" && state.event.checkin_open
+        ? "/clubs/discover"
+        : "/clubs"),
+  );
+}
 async function loadEvents(preferred = {}) {
   const epoch = ++state.epoch,
     eventId = preferred.eventId ?? state.event?.id,
@@ -327,7 +347,7 @@ async function loadEvents(preferred = {}) {
   $("page-error").hidden = true;
   $("empty-state").hidden = true;
   try {
-    const events = await api("/events");
+    const events = await workspaceEvents();
     if (epoch !== state.epoch) return;
     state.events = events;
     state.event =
@@ -335,38 +355,46 @@ async function loadEvents(preferred = {}) {
     $("events").replaceChildren(
       ...events.map((item) => new Option(item.title, item.id)),
     );
+    $("events").disabled = !events.length;
     if (!state.event) {
       state.club = null;
       state.clubs = [];
       $("clubs").replaceChildren(new Option("Chưa có CLB", ""));
+      $("events").replaceChildren(new Option("Chưa có sự kiện đang mở", ""));
+      $("clubs").disabled = true;
       applyPermissions();
       emptyState(
         "Chưa có sự kiện dành cho bạn",
         superUser()
           ? "Tạo sự kiện đầu tiên để bắt đầu kết nối các câu lạc bộ."
-          : "Liên hệ ban tổ chức để được thêm vào danh sách tham gia.",
+          : "Khi ban tổ chức mở sự kiện, bạn có thể xem các CLB và tự bấm Tham gia tại đây.",
       );
       return;
     }
     $("events").value = state.event.id;
-    const clubs = await api(eventPath() + "/clubs");
+    const clubs = await workspaceClubs();
     if (epoch !== state.epoch) return;
     state.clubs = clubs;
     state.club =
       clubs.find((item) => item.id === clubId) ||
-      (superUser() ? null : clubs[0] || null);
+      (state.me.role === "admin"
+        ? clubs.find((item) => item.can_manage) || clubs[0] || null
+        : null);
     const options = clubs.map((item) => new Option(item.name, item.id));
-    if (superUser()) options.unshift(new Option("Tất cả câu lạc bộ", ""));
+    if (superUser() || state.me.role === "student")
+      options.unshift(new Option("Tất cả CLB", ""));
+    if (!options.length) options.push(new Option("Chưa có CLB", ""));
     $("clubs").replaceChildren(...options);
+    $("clubs").disabled = !clubs.length;
     $("clubs").value = state.club?.id || "";
     state.offset = 0;
     $("filter").reset();
     applyPermissions();
     renderContext();
-    if (!clubs.length && !superUser()) {
+    if (!clubs.length && !superUser() && !state.event.checkin_open) {
       emptyState(
-        "Bạn chưa được thêm vào gian hàng",
-        "Liên hệ admin CLB để được thêm vào danh sách. Mỗi CLB có danh sách và vé riêng.",
+        "Chưa có gian hàng dành cho bạn",
+        "Ban tổ chức chưa mở gian hàng. Danh sách sẽ cập nhật khi CLB sẵn sàng.",
       );
       return;
     }
@@ -396,9 +424,15 @@ function renderContext() {
       (state.club.description || "Gian hàng kết nối cộng đồng công nghệ")
     : "Không gian chung của các câu lạc bộ học thuật HCMUTE";
   $("event-time").textContent = dateTime(state.event.starts_at);
-  $("event-status").textContent = open
-    ? "Đang mở điểm danh"
-    : "Đang đóng điểm danh";
+  $("event-status").textContent = !state.club
+    ? state.event.checkin_open
+      ? "Sự kiện đang mở"
+      : "Sự kiện đang đóng"
+    : open
+      ? "Đang mở điểm danh"
+      : state.event.checkin_open
+        ? "CLB chưa mở điểm danh"
+        : "Sự kiện đang đóng";
   $("event-status").className = "badge" + (open ? "" : " neutral");
   $("progress-scope").textContent = state.club?.name || "Toàn sự kiện";
   $("registered-label").textContent = state.club
@@ -416,12 +450,14 @@ function renderContext() {
     state.event.description || "Chưa có mô tả sự kiện.";
   $("toggle-event").textContent = state.event.checkin_open
     ? "Đóng sự kiện"
-    : "Mở điểm danh";
+    : "Mở sự kiện";
   $("admins-title").textContent = state.club
     ? "Admin · " + state.club.name
     : "Admin CLB";
   $("manager-overview").hidden = !manager() && !superUser();
   $("student-overview").hidden = manager() || superUser();
+  $("student-catalog").hidden = manager() || superUser();
+  if (!manager() && !superUser()) renderStudentCatalog();
   $("ticket-club-name").textContent = state.club?.name || "Chọn gian hàng";
   $("ticket-event-title").textContent = state.event.title;
   $("ticket-name").textContent = state.me.name;
@@ -434,11 +470,19 @@ async function showView(view) {
     view = "overview";
   if (view === "settings" && !superUser()) view = "overview";
   if (view === "ticket" && !state.club) {
-    notice("Chọn một gian hàng CLB để mở vé cá nhân.");
-    view = "overview";
+    const registered = state.clubs.find((item) => item.registered);
+    if (registered) {
+      state.club = registered;
+      $("clubs").value = registered.id;
+      renderContext();
+    } else {
+      notice("Chọn một CLB và bấm Tham gia để nhận vé cá nhân.");
+      view = "overview";
+    }
   }
   const previous = state.view;
   state.view = view;
+  $("account-menu").open = false;
   if (view !== "checkin") stopCamera();
   if (view !== "ticket") clearQr();
   all("[data-view]").forEach(
@@ -656,11 +700,17 @@ async function loadMyStatus() {
   if (epoch !== state.epoch) return;
   const open = state.event.checkin_open && data.club.checkin_open;
   state.club.checkin_open = data.club.checkin_open;
+  state.club.registered = data.registered;
+  state.club.attended = data.attended;
   let message = "Đưa mã QR cho admin tại gian hàng " + state.club.name + ".",
     kind = "";
   if (!data.registered) {
     message =
-      "Bạn đang quản trị gian hàng. Nhờ admin thêm bạn vào danh sách nếu muốn nhận vé tham gia.";
+      manager() || superUser()
+        ? "Bạn đang quản trị gian hàng. Vé cá nhân dành cho người đã tham gia CLB."
+        : "Bạn chưa tham gia " +
+          state.club.name +
+          ". Bấm Tham gia CLB để nhận vé.";
     kind = "warning";
   } else if (data.attended) {
     message = "Bạn đã điểm danh · " + dateTime(data.checked_at);
@@ -668,13 +718,19 @@ async function loadMyStatus() {
     clearQr("Đã xác nhận tham gia. Hẹn gặp tại những kết nối tiếp theo!");
   } else if (!open) {
     message =
-      "Gian hàng chưa mở điểm danh. Bạn có thể quay lại khi admin mở gian hàng.";
+      "Đã tham gia " +
+      state.club.name +
+      ". Gian hàng chưa mở điểm danh; mã QR sẽ sẵn sàng khi admin mở.";
     kind = "warning";
     clearQr();
   }
   $("ticket-status").className = "alert " + kind;
   $("ticket-status").textContent = message;
   $("get-qr").disabled = !data.registered || data.attended || !open;
+  $("get-qr").hidden = !data.registered || data.attended || !open;
+  $("join-club").hidden =
+    data.registered || !state.event.checkin_open || !canJoin();
+  $("qr").hidden = !data.registered || data.attended || !open;
   $("student-status-title").textContent = data.attended
     ? "Bạn đã để lại dấu ấn!"
     : "Sẵn sàng khám phá?";
@@ -685,6 +741,102 @@ async function loadMyStatus() {
       dateTime(data.checked_at) +
       ". Chọn CLB khác để tiếp tục hành trình."
     : message;
+}
+function canJoin() {
+  return (
+    !state.studentEmailOnly ||
+    /^[0-9]{6,15}@student\.hcmute\.edu\.vn$/.test(state.me?.email || "")
+  );
+}
+function renderStudentCatalog() {
+  const registered = state.clubs.filter((club) => club.registered);
+  $("catalog-count").textContent = state.clubs.length + " CLB";
+  $("my-ticket-shortcut").hidden = !registered.length;
+  if (!state.clubs.length) {
+    $("student-status-title").textContent = "Sự kiện đã mở";
+    $("student-status-text").textContent =
+      "Các gian hàng sẽ xuất hiện khi ban tổ chức thêm CLB vào ngày hội.";
+    $("student-clubs").replaceChildren(
+      node(
+        "p",
+        "empty-activity",
+        "Ban tổ chức đang chuẩn bị các gian hàng. Danh sách CLB sẽ tự cập nhật tại đây.",
+      ),
+    );
+    return;
+  }
+  if (!state.club) {
+    $("student-status-title").textContent = "Ngày hội đang chờ bạn";
+    $("student-status-text").textContent = registered.length
+      ? "Bạn đã tham gia " +
+        registered.length +
+        " CLB. Mở vé để xem trạng thái và mã QR của từng gian hàng."
+      : "Chọn một gian hàng trong danh sách và bấm Tham gia CLB để nhận vé của mình.";
+  }
+  $("student-clubs").replaceChildren(
+    ...state.clubs.map((club) => {
+      const card = node("article", "student-club-card"),
+        heading = node("div", "student-club-heading"),
+        copy = node("div");
+      copy.append(
+        node("h3", "", club.name),
+        node(
+          "span",
+          "badge " + (club.registered ? "" : "neutral"),
+          club.attended
+            ? "Đã điểm danh"
+            : club.registered
+              ? "Đã tham gia"
+              : "Chưa tham gia",
+        ),
+      );
+      heading.append(clubMark(club.name), copy);
+      const button = node(
+        "button",
+        "button " + (club.registered ? "secondary" : ""),
+        club.registered ? "Xem vé của tôi" : "Tham gia CLB",
+      );
+      button.setAttribute(
+        "aria-label",
+        (club.registered ? "Xem vé " : "Tham gia ") + club.name,
+      );
+      button.disabled =
+        !club.registered && (!state.event.checkin_open || !canJoin());
+      button.onclick = guarded(async () => {
+        $("clubs").value = club.id;
+        await selectClub();
+        if (!club.registered) await joinSelectedClub();
+        else await showView("ticket");
+      });
+      card.append(
+        heading,
+        node(
+          "p",
+          "",
+          club.description ||
+            "Kết nối và khám phá hoạt động cùng " + club.name + ".",
+        ),
+        node(
+          "span",
+          "club-checkin-note",
+          club.checkin_open && state.event.checkin_open
+            ? "Đang mở điểm danh"
+            : "Chưa mở điểm danh",
+        ),
+        button,
+      );
+      return card;
+    }),
+  );
+}
+async function joinSelectedClub() {
+  const epoch = state.epoch,
+    id = state.club.id;
+  await api(clubPath() + "/join", { method: "POST" });
+  if (epoch !== state.epoch) return;
+  await loadEvents({ clubId: id });
+  await showView("ticket");
+  notice("Đã tham gia " + state.club.name + ". Vé cá nhân đã sẵn sàng.");
 }
 async function loadSettings() {
   if (!superUser()) return;
@@ -1073,12 +1225,23 @@ all("dialog").forEach((dialog) =>
 );
 $("notice-close").onclick = () => ($("notice").hidden = true);
 $("logout").onclick = logout;
+document.addEventListener("click", (event) => {
+  const menu = $("account-menu");
+  if (!menu.contains(event.target)) menu.open = false;
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && $("account-menu").open) {
+    $("account-menu").open = false;
+    $("account-menu").querySelector("summary").focus();
+  }
+});
 $("reload").onclick = guarded(() => bootUser());
 $("events").onchange = guarded(() =>
   loadEvents({ eventId: Number($("events").value) }),
 );
 $("clubs").onchange = guarded(selectClub);
 $("get-qr").onclick = guarded(generateQr);
+$("join-club").onclick = guarded(joinSelectedClub);
 $("camera-start").onclick = guarded(startCamera);
 $("camera-stop").onclick = stopCamera;
 $("qr-file").onchange = guarded((event) => scanFile(event.target.files[0]));
@@ -1264,7 +1427,6 @@ let refreshing = false;
 setInterval(async () => {
   if (
     !state.me ||
-    !state.event ||
     document.hidden ||
     refreshing ||
     document.querySelector("dialog[open]")
@@ -1275,9 +1437,13 @@ setInterval(async () => {
   try {
     const identity = await api("/auth/me");
     if (epoch !== state.epoch) return;
-    const clubs = await api(eventPath() + "/clubs");
+    const events = await workspaceEvents();
     if (epoch !== state.epoch) return;
-    const events = await api("/events");
+    if (!state.event) {
+      if (events.length) await loadEvents();
+      return;
+    }
+    const clubs = await workspaceClubs();
     if (epoch !== state.epoch) return;
     if (
       identity.role !== state.me.role ||
@@ -1287,6 +1453,15 @@ setInterval(async () => {
       (state.club && !clubs.some((item) => item.id === state.club.id))
     ) {
       await bootUser();
+      return;
+    }
+    if (
+      events.map((item) => item.id).join() !==
+        state.events.map((item) => item.id).join() ||
+      clubs.map((item) => item.id).join() !==
+        state.clubs.map((item) => item.id).join()
+    ) {
+      await loadEvents();
       return;
     }
     state.me = identity;
@@ -1299,6 +1474,7 @@ setInterval(async () => {
     renderContext();
     if (state.view === "overview" && (manager() || superUser()))
       await loadSummary();
+    else if (state.view === "participants" && manager()) await loadStudents();
     else if (state.club && ["ticket", "overview"].includes(state.view))
       await loadMyStatus();
   } catch (error) {
@@ -1310,6 +1486,7 @@ setInterval(async () => {
 (async () => {
   try {
     const config = await api("/auth/config");
+    state.studentEmailOnly = config.student_email_only;
     $("policy").textContent = config.student_email_only
       ? "Sinh viên dùng @student.hcmute.edu.vn. Admin có thể dùng email Google đã được cấp quyền."
       : "Dùng tài khoản Google có email đã xác minh.";

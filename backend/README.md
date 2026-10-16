@@ -27,7 +27,7 @@ Token trả về dùng `Authorization: Bearer <access_token>`. Hết phiên sau 
 
 - Superadmin: email bootstrap nằm trong `SUPERADMIN_EMAILS` hoặc được superadmin khác cấp quyền. Có thể dùng Gmail đã xác minh; cấu hình không bỏ qua xác thực Google.
 - Admin: được superadmin gán theo CLB; có thể dùng email Google ngoài trường đã được cấp quyền. Quyền được đọc từ DB trong từng request.
-- Sinh viên: chỉ thấy sự kiện đã được thêm vào; nhận QR của chính mình khi mở điểm danh.
+- Sinh viên: thấy các sự kiện đang mở và những sự kiện mình đã tham gia; tự bấm Tham gia CLB để nhận vé riêng, nhận QR khi gian hàng mở điểm danh.
 
 ## API chính
 
@@ -102,7 +102,7 @@ Dashboard hiện dùng API CLB. Các bảng mới `event_clubs`, `club_admins`, 
 
 - Superadmin tạo CLB, gán / thu hồi admin và xem tổng hợp toàn sự kiện.
 - Admin CLB chỉ đọc danh sách, thêm/import sinh viên, xuất kết quả và quét QR của CLB được gán. Có thể gán một người cho nhiều CLB.
-- Sinh viên chỉ thấy các gian hàng đã được thêm vào; có vé và trạng thái tham gia riêng cho từng CLB. Không tự đăng ký qua dashboard.
+- Sinh viên thấy danh mục gian hàng của sự kiện đang mở, tự tham gia bằng tài khoản của mình và có vé riêng cho từng CLB. Danh sách người tham gia vẫn chỉ dành cho admin CLB / superadmin.
 - Một lần điểm danh hợp lệ tại RTIC không xác nhận tham gia DSC. QR dùng `kind=club_checkin`, gắn cả `event_id` và `club_id`; không hoán đổi được với access token hoặc QR API cũ.
 - Sự kiện và CLB đều phải mở thì mới tạo QR hoặc quét được. Superadmin điều khiển sự kiện; admin CLB có thể mở/đóng gian hàng mình.
 - Khi sự kiện đã có ít nhất một CLB, mọi API quản trị danh sách / điểm danh toàn sự kiện cũ chỉ còn dành cho superadmin. Quyền `EventAdmin` cũ không thể dùng để vượt phạm vi CLB; ban tổ chức cần gán lại admin cho gian hàng phù hợp.
@@ -115,6 +115,9 @@ Tiền tố gian hàng: `/events/{event_id}/clubs/{club_id}`.
 | Method | Path | Quyền và kết quả |
 |---|---|---|
 | GET / POST | `/events/{event_id}/clubs` | Danh sách CLB có quyền truy cập / superadmin tạo CLB |
+| GET | `/events/discover` | Tài khoản đã đăng nhập xem metadata các sự kiện đang mở; không trả danh sách sinh viên |
+| GET | `/events/{event_id}/clubs/discover` | Danh mục gian hàng của sự kiện đang mở, kèm trạng thái tham gia của chính tài khoản |
+| POST | `{prefix}/join` | Tự tham gia CLB bằng tài khoản hiện tại; không nhận user_id của người khác, gọi lặp không thêm trùng |
 | GET | `/events/{event_id}/summary` | Chỉ superadmin; tổng lượt đăng ký, lượt điểm danh và số sinh viên duy nhất đã ghé |
 | GET | `{prefix}/summary` | Admin CLB / superadmin; số liệu và 6 lượt điểm danh gần nhất |
 | GET / POST / DELETE | `{prefix}/admins[/{user_id}]` | Xem đội ngũ CLB / superadmin gán / thu hồi |
@@ -128,6 +131,8 @@ Tiền tố gian hàng: `/events/{event_id}/clubs/{club_id}`.
 | POST | `{prefix}/attendance/scan` | Admin CLB xác nhận; quét lặp trả bản ghi cũ |
 
 `GET {prefix}/students` trả `{"items": [...], "total": 120, "offset": 0, "limit": 25}`. Bộ lọc `search` tìm tên, MSSV hoặc email; `attended` lọc trạng thái; `limit` tối đa 500. Tìm kiếm tên không bỏ dấu tiếng Việt. Export sử dụng cùng bộ lọc và không giới hạn ở trang đang xem.
+
+Phân biệt trạng thái: mở sự kiện cho phép sinh viên xem và đăng ký CLB; mỗi CLB vẫn có công tắc mở điểm danh riêng. Sinh viên có thể đăng ký trước khi gian hàng mở, nhưng không nhận được QR cho đến khi cả hai công tắc đều mở. Đăng ký không tự tạo bản ghi điểm danh.
 
 Tổng hợp sự kiện tính **lượt** theo CLB: một sinh viên đăng ký hai CLB tạo hai lượt đăng ký, ghé cả hai tạo hai lượt điểm danh. `unique_attendees` đếm sinh viên duy nhất đã điểm danh trong các CLB.
 

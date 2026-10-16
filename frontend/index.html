@@ -16,9 +16,9 @@
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/style.css?v=20261016-discovery" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="/ui/app.js" defer></script>
+    <script src="/ui/app.js?v=20261016-discovery" defer></script>
   </head>
   <body>
     <svg
@@ -241,18 +241,31 @@
               ><strong id="breadcrumb">Tổng quan</strong>
             </div>
           </div>
-          <div class="topbar-account">
-            <span class="avatar" id="my-avatar"></span>
-            <div><strong id="my-name"></strong><span id="my-role"></span></div>
-            <button
-              id="logout"
-              class="icon-button"
-              aria-label="Đăng xuất"
-              title="Đăng xuất"
+          <details class="topbar-account account-menu" id="account-menu">
+            <summary
+              class="account-trigger"
+              role="button"
+              aria-label="Tài khoản"
             >
-              <svg class="icon"><use href="#i-logout" /></svg>
-            </button>
-          </div>
+              <span class="avatar" id="my-avatar"></span>
+              <div class="account-copy">
+                <strong id="my-name"></strong><span id="my-role"></span>
+              </div>
+              <span class="account-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="account-panel">
+              <span class="eyebrow">TÀI KHOẢN GOOGLE</span
+              ><strong id="account-email"></strong>
+              <button
+                id="logout"
+                class="button secondary full-width"
+                aria-label="Đăng xuất"
+                title="Đăng xuất"
+              >
+                <svg class="icon"><use href="#i-logout" /></svg>Đăng xuất
+              </button>
+            </div>
+          </details>
         </header>
         <main id="main-content" class="page-content" tabindex="-1">
           <div id="offline" class="alert warning" hidden>
@@ -449,6 +462,24 @@
                   <div id="club-board" class="club-board"></div>
                 </article>
               </div>
+              <article
+                id="student-catalog"
+                class="panel student-catalog"
+                hidden
+              >
+                <div class="panel-heading">
+                  <div>
+                    <span class="eyebrow">KHÁM PHÁ &amp; KẾT NỐI</span>
+                    <h2>Các gian hàng dành cho bạn</h2>
+                    <p>
+                      Chọn CLB để tham gia. Mỗi gian hàng có vé và kết quả
+                      riêng.
+                    </p>
+                  </div>
+                  <span class="count-pill" id="catalog-count"></span>
+                </div>
+                <div id="student-clubs" class="student-clubs"></div>
+              </article>
               <div id="student-overview" class="overview-grid" hidden>
                 <article class="panel personal-welcome">
                   <span class="eyebrow">HÀNH TRÌNH CỦA BẠN</span>
@@ -457,7 +488,11 @@
                     Mở vé cá nhân và đưa mã QR cho admin tại gian hàng để xác
                     nhận tham gia.
                   </p>
-                  <button class="button" data-go="ticket">
+                  <button
+                    class="button"
+                    data-go="ticket"
+                    id="my-ticket-shortcut"
+                  >
                     Mở vé của tôi
                     <svg class="icon"><use href="#i-arrow" /></svg>
                   </button>
@@ -469,8 +504,8 @@
                     <li>
                       <span>01</span>
                       <div>
-                        <strong>Chọn đúng câu lạc bộ</strong>
-                        <p>Mỗi gian hàng có vé và kết quả riêng.</p>
+                        <strong>Tham gia CLB yêu thích</strong>
+                        <p>Bấm Tham gia để nhận vé riêng của gian hàng.</p>
                       </div>
                     </li>
                     <li>
@@ -696,6 +731,9 @@
                         aria-label="Thời gian hiệu lực mã QR"
                       ></progress>
                     </div>
+                    <button id="join-club" class="button full-width" hidden>
+                      Tham gia CLB này
+                    </button>
                     <button id="get-qr" class="button full-width">
                       Hiển thị mã QR
                     </button>
@@ -746,8 +784,12 @@
                   <p id="event-description"></p>
                   <div class="setting-row">
                     <div>
-                      <strong>Điểm danh toàn sự kiện</strong>
-                      <p>Đóng sự kiện sẽ tạm dừng mọi gian hàng CLB.</p>
+                      <strong>Mở sự kiện cho sinh viên</strong>
+                      <p>
+                        Sinh viên thấy sự kiện và tự tham gia CLB khi mở. Mỗi
+                        CLB cần mở điểm danh riêng để dùng QR; đóng sự kiện sẽ
+                        tạm dừng tất cả gian hàng.
+                      </p>
                     </div>
                     <button id="toggle-event" class="button secondary"></button>
                   </div>

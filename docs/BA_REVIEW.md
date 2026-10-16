@@ -21,8 +21,9 @@ Nguồn các mục: `docs/knowledge_base/specialized/ux_research.md`, `validatio
 2. FIT Club Day là sự kiện chung gồm nhiều CLB tham gia.
 3. Admin chỉ quản lý danh sách của CLB được gán; superadmin xem toàn bộ.
 4. Điểm danh độc lập tại từng gian hàng CLB.
+5. Sinh viên tự bấm **Tham gia CLB** khi sự kiện đang mở; admin tiếp tục chỉ quản lý danh sách CLB mình.
 
-Quy tắc triển khai được suy ra và ghi rõ để chủ dự án đối chiếu: sinh viên có thể thuộc nhiều CLB; thêm/import danh sách do admin thực hiện; cả sự kiện và gian hàng phải mở để điểm danh; danh sách cũ chưa phân loại được giữ riêng, không tự đoán CLB.
+Sinh viên có thể thuộc nhiều CLB; admin có thể thêm/import danh sách và sinh viên có thể tự tham gia khi sự kiện mở. Cả sự kiện và gian hàng phải mở để điểm danh QR. Danh sách cũ chưa phân loại được giữ riêng, không tự đoán CLB.
 
 ## Hành trình và khoảng trống ban đầu
 
@@ -37,7 +38,7 @@ Quy tắc triển khai được suy ra và ghi rõ để chủ dự án đối c
 
 ## Ưu tiên và giới hạn phạm vi
 
-MoSCoW áp dụng cho 12 nhóm yêu cầu cùng cấp, với 2 Must (16,7%), 2 Should, 2 Could và 6 Won't. Phân loại dựa trên quy tắc nghiệp vụ đã xác nhận, không phải điểm số khảo sát.
+Backlog hiện có 12 nhóm yêu cầu, với 2 Must, 3 Should, 2 Could và 5 Won't. FR-07 được triển khai theo xác nhận trực tiếp của chủ dự án về luồng sinh viên tự tham gia.
 
 | ID | Nhóm yêu cầu | Ưu tiên | Quyết định |
 |---|---|---|---|
@@ -47,7 +48,7 @@ MoSCoW áp dụng cho 12 nhóm yêu cầu cùng cấp, với 2 Must (16,7%), 2 S
 | FR-04 | Vé sinh viên và trạng thái cá nhân | Should | Triển khai trên FR-02 |
 | FR-05 | Tìm kiếm, phân trang và xuất cùng bộ lọc | Could | Triển khai; giảm thao tác quản lý danh sách |
 | FR-06 | Nhập Excel và phản hồi theo dòng | Could | Triển khai; tái sử dụng quy tắc kiểm tra hiện có |
-| FR-07 | Sinh viên tự đăng ký vào gian hàng | Won't | Cần chính sách đăng ký / duyệt / sức chứa |
+| FR-07 | Sinh viên tự đăng ký vào gian hàng | Should | Đã triển khai: xem sự kiện mở, tự tham gia, nhận vé; không thay đổi quyền admin |
 | FR-08 | Chứng nhận, điểm rèn luyện tự động | Won't | Cần tiêu chí công nhận từ khoa |
 | FR-09 | Gamification, passport và quà tặng | Won't | Cần luật tích điểm / chống nhận quà trùng |
 | FR-10 | Điểm danh ngoại tuyến | Won't | Cần giải quyết đồng bộ và xung đột dữ liệu |
@@ -66,8 +67,9 @@ MoSCoW áp dụng cho 12 nhóm yêu cầu cùng cấp, với 2 Must (16,7%), 2 S
 | FR-04 | Sinh viên thấy vé, QR tự đổi khi hết hạn, trạng thái riêng từng CLB | Chưa đăng ký / đóng gian hàng có hướng dẫn; access token không thay được QR; đổi ngữ cảnh xóa QR cũ | `test_clubs.py`: status / closure / purpose; browser mobile / renewal |
 | FR-05 | Tìm tên, MSSV, email; trả items/total/offset/limit | Trang rỗng vẫn có tổng đúng; ký tự `%` không trở thành wildcard; export gồm toàn bộ kết quả khớp | `test_clubs.py`: filters / pagination / export; browser tìm kiếm |
 | FR-06 | File hợp lệ thêm đúng vào CLB; dòng trùng báo riêng | File có dòng sai không thêm dòng nào; giới hạn dung lượng / dòng / giải nén giữ nguyên; không lọt sang CLB khác | `test_clubs.py`: scoped atomic import; test API cũ kiểm tra parser dùng chung |
+| FR-07 | Tài khoản chưa đăng ký thấy sự kiện mở, tự tham gia CLB và nhận vé | Chỉ đăng ký cho mình; gọi lặp không thêm trùng; đóng sự kiện ngăn đăng ký; QR vẫn đợi gian hàng mở; không có quyền xem roster CLB | `test_discovery.py` và browser journey ở 360/390/768 px |
 
-Yêu cầu giao diện bổ sung: 375 px không tràn ngang ở luồng vé; menu ẩn chức năng không thuộc quyền; có trạng thái rỗng / tải / lỗi; dialog có đóng / hủy / Escape; camera và QR dừng khi rời ngữ cảnh; không dựng dữ liệu người dùng bằng HTML chưa escape.
+Yêu cầu giao diện bổ sung: các luồng mới được kiểm tra ở 360, 390 và 768 px, thêm quản trị / form ở 375 px; không tràn ngang toàn trang, bảng cuộn trong vùng riêng; nút chính có vùng chạm tối thiểu 44 px. Menu Tài khoản hiển thị email đăng nhập. Trang đang trống tự cập nhật khi sự kiện được mở. Dialog có đóng / hủy / Escape; camera và QR dừng khi rời ngữ cảnh; không dựng dữ liệu người dùng bằng HTML chưa escape.
 
 ## Reflection Mode (System 2)
 
@@ -75,15 +77,15 @@ Yêu cầu giao diện bổ sung: 375 px không tràn ngang ở luồng vé; men
 - Quyền `EventAdmin` cũ là đường có thể lách phạm vi mới. Đã có test tái hiện trả 200; sau sửa, trả 403 cho quản trị danh sách toàn sự kiện khi có CLB.
 - Tổng hợp phải phân biệt **lượt** và **người duy nhất**. Giao diện toàn sự kiện dùng nhãn lượt; không trình bày một sinh viên ghé hai gian hàng như hai sinh viên.
 - Không xem ảnh chụp đẹp là bằng chứng usability. Chưa có nghiên cứu với sinh viên / admin tại sự kiện, chưa kiểm thử camera trên thiết bị vật lý và chưa kiểm thử Google OAuth thật.
-- Không mở rộng sang đăng ký tự do, phát quà, chứng nhận hoặc gửi tin khi chưa có quy tắc nghiệp vụ.
+- Chỉ mở tự tham gia khi công tắc sự kiện đã bật, theo quyết định của chủ dự án; không mở rộng sang phát quà, chứng nhận hoặc gửi tin.
 
 ## Đánh giá nghiệm thu phạm vi
 
-**Điểm kiểm tra yêu cầu: 100/100 (6/6 nhóm triển khai có nguồn, phạm vi quyền, phụ thuộc và ca thành công/biên/lỗi).** Đây là điểm đầy đủ của phạm vi tài liệu, không phải chứng nhận chất lượng tổng thể hay điểm khảo sát UX. Kiểm tra INVEST: từng nhóm độc lập về giá trị, có thể thay đổi cách triển khai, có tiêu chí thực thi; FR-03/04/05/06 có phụ thuộc FR-01/02 được ghi rõ.
+**7/7 nhóm triển khai có nguồn, phạm vi quyền, phụ thuộc và ca thành công/biên/lỗi.** Đây là đánh giá đầy đủ của phạm vi tài liệu, không phải chứng nhận chất lượng tổng thể hay điểm khảo sát UX. FR-03/04/05/06/07 có phụ thuộc vào mô hình quyền và điểm danh FR-01/02.
 
 Khuyến nghị: đủ điều kiện bàn giao bản sửa để chủ dự án xem và chạy UAT. Người nhận tiếp theo là chủ dự án / đại diện CLB để xác nhận hành trình thực tế; nếu phát hiện thiếu quy tắc, quay lại `ba-master` để bổ sung phạm vi trước khi mở rộng.
 
-Kết quả thực thi ngày 16/10/2026: **107 test qua**, gồm 84 test nền, 17 test bổ sung cho CLB và 6 hành trình trình duyệt. Có một cảnh báo deprecation từ Starlette TestClient; không có test lỗi. `node --check frontend/app.js` và `git diff --check` qua. CI đã chuyển từ chỉ test giao diện sang toàn bộ test API. Ảnh kiểm tra bố cục nằm tại `docs/previews/`; số liệu trên ảnh là dữ liệu giả lập.
+Kết quả thực thi ngày 16/10/2026: **127 test qua**, gồm 115 test API và 12 trường hợp trình duyệt. Có một cảnh báo deprecation từ Starlette TestClient; không có test lỗi. `node --check frontend/app.js` và `git diff --check` qua. CI chạy toàn bộ test API. Ảnh kiểm tra bố cục nằm tại `docs/previews/`; số liệu trên ảnh là dữ liệu giả lập.
 
 Nhận diện giao diện: logo HCMUTE, FIT, RTIC, DSC và ISC dùng file PNG gốc sao chép nguyên vẹn; nguồn được ghi ở `assets/brand/SOURCES.md`. Logo sự kiện và đơn vị còn lại dùng bản cắt từ poster gốc. Logo theo CLB được đồng bộ ở dashboard, danh sách gian hàng và vé sinh viên; có test chuyển CLB kiểm tra cả hình nhận diện lẫn tên vé.
 

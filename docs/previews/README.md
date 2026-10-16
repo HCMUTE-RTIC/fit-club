@@ -4,5 +4,7 @@
 
 - `manager-desktop.png`: dashboard admin CLB, viewport 1440 × 1000.
 - `student-mobile.png`: vé sinh viên, viewport 375 × 1000.
+- `student-overview-mobile.png`: sinh viên mới xem sự kiện và các gian hàng, viewport 390 × 1000.
+- `student-registration-mobile.png`: vé sau khi tự tham gia CLB chưa mở điểm danh, viewport 390 × 1000.
 
 Tạo lại bằng cách đặt `FITCLUB_PREVIEW_DIR` thành đường dẫn thư mục này rồi chạy `tests/test_browser.py` theo hướng dẫn backend.
